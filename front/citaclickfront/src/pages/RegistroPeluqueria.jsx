@@ -68,7 +68,7 @@ function Registrarpeluqueria() {
     formData.append('imagen', imagen);
     formData.append('fecha_registro', fechaRegistroFormateada);
     formData.append('fecha_vencimiento', fechaVencimientoFormateada);
-    formData.append('horario_id', horario_Id); // 🔗
+    formData.append('horario', horario_Id); // 🔗
 
    const resPeluqueria = await fetch('http://localhost:8000/api/peluquerias/', {
   method: 'POST',

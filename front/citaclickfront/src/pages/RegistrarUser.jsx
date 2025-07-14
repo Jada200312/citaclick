@@ -30,8 +30,8 @@ function CrearUser() {
 
     const formData = new FormData();
     formData.append('username', username);
-    formData.append('name', name);
-    formData.append('lastname', lastname);
+    formData.append('first_name', name);
+    formData.append('last_name', lastname);
     formData.append('password', password);
     formData.append('email', email);
     formData.append('es_peluqueria', esPeluqueria ? 'true' : 'false');

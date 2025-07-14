@@ -16,11 +16,15 @@ class PeluqueriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Peluqueria
         fields = '__all__'
+        extra_kwargs = {
+            'usuario': {'read_only': True},  # <- Esto evita que sea requerido
+        }
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep['usuario'] = instance.usuario.id
         return rep
+
 
 class CalificacionSerializer(serializers.ModelSerializer):
     class Meta:

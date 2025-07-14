@@ -21,7 +21,7 @@ class Peluqueria(models.Model):
     ciudad = models.CharField(max_length=100)
     horario = models.ForeignKey(Horario, on_delete=models.SET_NULL, null=True)
     fecha_registro = models.DateField(auto_now_add=True)
-    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True, default=1)
+    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True, default="1")
     fecha_vencimiento = models.DateField(null=True, blank=True)
     estado = models.BooleanField(default=True)
     imagen = models.ImageField(upload_to='peluquerias/', null=True, blank=True)
