@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import Logo from '../assets/log.png';
 import { useNavigate } from 'react-router-dom';
-
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext.jsx';
 function CrearUser() {
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   document.title = "Registrarse";
@@ -58,7 +60,7 @@ function CrearUser() {
         return;
       }
 
-      // ✅ Login automático
+      // Login automático
       const loginRes = await fetch('http://localhost:8000/api/token/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -74,9 +76,9 @@ function CrearUser() {
       }
 
       const loginData = await loginRes.json();
-      localStorage.setItem('token', loginData.access); // 🔥 Guardas el token
+      localStorage.setItem('token', loginData.access); // Guardas el token
       localStorage.setItem('refresh', loginData.refresh);
-
+      login(loginData.access);
       setAlerta({
         tipo: 'exito',
         mensaje: 'Usuario registrado y autenticado correctamente'

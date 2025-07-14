@@ -1,26 +1,27 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Nav';
-import IniciarSesion from './pages/Inicio';
+import { AuthProvider } from './context/AuthContext.jsx';
+import Inicio from './pages/Inicio';
+import Login from './pages/Login'
 import RegistrarUser from './pages/RegistrarUser';
 import RegistroPeluqueria from './pages/RegistroPeluqueria';
 import Footer from'./components/Footer'
 import './index.css';
 
-
-
-
 function App() {
   return (
+    <AuthProvider>
     <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path="/" element={<IniciarSesion />} />
-        <Route path="/registrar" element={<RegistrarUser />} />
-        <Route path="/peluqueria" element={<RegistroPeluqueria />} />
-     
+  <Route path="/" element={<Inicio />} />
+  <Route path="/login" element={<Login />} />
+  <Route path="/registrar" element={<RegistrarUser />} />
+  <Route path="/peluqueria" element={<RegistroPeluqueria />} />
       </Routes>
       <Footer/>
     </BrowserRouter>
+    </AuthProvider>
     
   );
 }
