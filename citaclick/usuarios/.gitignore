@@ -1,0 +1,16 @@
+# Archivos de entorno virtual (Python/Django)
+.env
+.env.local
+.env.*.local
+venv/
+env/
+ENV/
+*.env
+
+# Cachés de Python (sí se deben ignorar)
+__pycache__/
+*.pyo
+
+# VSCode config
+.vscode/
+
