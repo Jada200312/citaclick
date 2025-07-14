@@ -10,10 +10,12 @@ function Navbar() {
   const isActive = (path) => ruta === path
 
   const isAuthenticated = !!localStorage.getItem('access_token')
+  const esPeluqueria = localStorage.getItem('es_peluqueria') === 'true'
 
   const handleLogout = () => {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    localStorage.removeItem('es_peluqueria')
     navigate('/')
   }
 
@@ -36,16 +38,16 @@ function Navbar() {
           Inicio
         </Link>
 
-        {!isAuthenticated && ruta === '/login' &&(
-    <Link
-      to="/registrar"
-      className={`px-3 py-1 rounded-md transition ${
-        isActive('/registrar') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500 '
-      }`}
-    >
-      Registrar
-    </Link>
-  )}
+        {!isAuthenticated && ruta === '/login' && (
+          <Link
+            to="/registrar"
+            className={`px-3 py-1 rounded-md transition ${
+              isActive('/registrar') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500 '
+            }`}
+          >
+            Registrar
+          </Link>
+        )}
 
         {!isAuthenticated ? (
           <Link
@@ -57,12 +59,34 @@ function Navbar() {
             Iniciar sesión
           </Link>
         ) : (
-          <button
-            onClick={handleLogout}
-            className="px-3 py-1 rounded-md transition hover:bg-red-600 bg-red-500"
-          >
-            Cerrar sesión
-          </button>
+          <>
+            {esPeluqueria && (
+              <Link
+                to="/panel-peluqueria"
+                className={`px-3 py-1 rounded-md transition ${
+                  isActive('/panel-peluqueria') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500 '
+                }`}
+              >
+                Panel Peluquería
+              </Link>
+            )}
+              <Link
+                to="/reserva"
+                className={`px-3 py-1 rounded-md transition ${
+                  isActive('/reserva') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500 '
+                }`}
+              >
+                Reservar
+              </Link>
+            
+            
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1 rounded-md transition hover:bg-red-600 bg-red-500"
+            >
+              Cerrar sesión
+            </button>
+          </>
         )}
       </div>
     </nav>

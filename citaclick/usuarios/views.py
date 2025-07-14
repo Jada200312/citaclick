@@ -4,6 +4,15 @@ from .serializers import UsuarioSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def obtener_usuario_logueado(request):
+    serializer = UsuarioSerializer(request.user)
+    return Response(serializer.data)
+
 
 class UsuarioCreateView(generics.CreateAPIView):
     queryset = Usuario.objects.all()

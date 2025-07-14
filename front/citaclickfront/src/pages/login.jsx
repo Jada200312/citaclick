@@ -1,35 +1,46 @@
-// pages/Login.jsx
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { AuthContext } from '../context/AuthContext' // Ajusta la ruta según tu estructura
 
 function Login() {
   const navigate = useNavigate()
+  const { login } = useContext(AuthContext)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      const response = await axios.post('http://localhost:8000/api/token/', {
-        username,
-        password,
-      })
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await axios.post('http://localhost:8000/api/token/', {
+      username,
+      password,
+    });
 
-      const { access, refresh } = response.data
+    const { access, refresh } = response.data;
+    localStorage.setItem('access_token', access);
+    localStorage.setItem('refresh_token', refresh);
 
-      // Guardamos los tokens en localStorage
-      localStorage.setItem('access_token', access)
-      localStorage.setItem('refresh_token', refresh)
+    // ⚠️ Obtener los datos del usuario autenticado
+    const userResponse = await axios.get('http://localhost:8000/api/usuarios/tipo-usuario-logueado/', {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    });
 
-      navigate('/')
-    } catch (err) {
-      console.error(err)
-      setError('Credenciales incorrectas')
-    }
+    const user = userResponse.data;
+
+    // Guarda la info necesaria (como es_peluqueria) en localStorage
+    localStorage.setItem('es_peluqueria', user.es_peluqueria);
+
+    navigate('/');
+  } catch (err) {
+    console.error(err);
+    setError('Credenciales incorrectas');
   }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">

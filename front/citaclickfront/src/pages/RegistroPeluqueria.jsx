@@ -11,7 +11,7 @@ function Registrarpeluqueria() {
   const [horaFin, setHoraFin] = useState('');
   const [intervalo_tiempo, setIntervaloTiempo] = useState('');
   const [imagen, setImagen] = useState(null);
-  const [alerta, setAlerta] = useState(null); // ← esto te faltaba
+  const [alerta, setAlerta] = useState(null); 
 
   const manejarEnvio = async (e) => {
   e.preventDefault();
@@ -60,7 +60,7 @@ function Registrarpeluqueria() {
     const horarioCreado = await resHorario.json();
     const horario_Id = horarioCreado.id;
 
-    // 2. Crear peluquería con el horarioId
+    // Crear peluquería con el horarioId
     const formData = new FormData();
     formData.append('nombre', nombre);
     formData.append('direccion', direccion);
