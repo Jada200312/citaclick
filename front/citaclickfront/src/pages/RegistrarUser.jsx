@@ -11,7 +11,7 @@ function CrearUser() {
   const [lastname, setlastname] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
-  const [esPeluqueria, setEsPeluqueria] = useState();
+  const [esPeluqueria, setEsPeluqueria] = useState(false);
   const [celular, setCelular] = useState('');
   const [imagen, setImagen] = useState(null);
   const [cedula, setCedula] = useState('');
@@ -58,21 +58,30 @@ function CrearUser() {
         return;
       }
 
-      await res.json();
+      // ✅ Login automático
+      const loginRes = await fetch('http://localhost:8000/api/token/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (!loginRes.ok) {
+        setAlerta({
+          tipo: 'error',
+          mensaje: 'El usuario se registró pero hubo un problema al iniciar sesión automáticamente.'
+        });
+        return;
+      }
+
+      const loginData = await loginRes.json();
+      localStorage.setItem('token', loginData.access); // 🔥 Guardas el token
+      localStorage.setItem('refresh', loginData.refresh);
 
       setAlerta({
         tipo: 'exito',
-        mensaje: 'Usuario creado correctamente'
+        mensaje: 'Usuario registrado y autenticado correctamente'
       });
-
-      setUsername('');
-      setname('');
-      setlastname('');
-      setPassword('');
-      setEmail('');
-      setCelular('');
-      setImagen(null);
-      setCedula('');
+manejarRedireccion();
     } catch (err) {
       console.error('Error inesperado:', err);
       setAlerta({
@@ -81,13 +90,12 @@ function CrearUser() {
       });
     }
   };
-//culo
+
   const manejarRedireccion = () => {
     if (esPeluqueria) {
       navigate('/peluqueria');
-      setEsPeluqueria();
     } else {
-      navigate('/'); 
+      navigate('/');
     }
   };
 
@@ -95,13 +103,7 @@ function CrearUser() {
     <div className="bg-black min-h-screen flex justify-center items-center px-6 py-4 mt-6 mb-2">
       {alerta && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div
-            className={`p-6 rounded-lg shadow-lg max-w-md w-full mx-4 ${
-              alerta.tipo === 'exito'
-                ? 'bg-black border border-orange-600 text-orange-600'
-                : 'bg-black border border-orange-600 text-orange-600'
-            }`}
-          >
+          <div className={`p-6 rounded-lg shadow-lg max-w-md w-full mx-4 bg-black border border-orange-600 text-orange-600`}>
             <h2 className="text-xl font-semibold mb-2">
               {alerta.tipo === 'exito' ? 'Registro exitoso' : 'Error'}
             </h2>
@@ -132,120 +134,60 @@ function CrearUser() {
         encType="multipart/form-data"
         className="md:w-[60%] space-y-3 w-full max-w-md bg-zinc-950 p-4 rounded shadow"
       >
-        <h1 className="text-xl font-bold text-white">
-          Bienve<span className="text-orange-500">nido</span>
-        </h1>
-
+        <h1 className="text-xl font-bold text-white">Bienve<span className="text-orange-500">nido</span></h1>
         <p className="text-base text-white leading-relaxed">Complete Los Siguientes Campos:</p>
 
         <div className="flex justify-end">
           <button className="block text-sm font-medium text-orange-600">Iniciar Sesión</button>
         </div>
 
+        {/* Campos de registro */}
         <div>
           <label className="block text-sm font-medium text-white">Nombre de usuario:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
-          />
+          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-white">Nombre:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setname(e.target.value)}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
-          />
+          <input type="text" value={name} onChange={(e) => setname(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-white">Apellido:</label>
-          <input
-            type="text"
-            value={lastname}
-            onChange={(e) => setlastname(e.target.value)}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
-          />
+          <input type="text" value={lastname} onChange={(e) => setlastname(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-white">Contraseña:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
-          />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-white">Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
-          />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
         </div>
 
         <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={esPeluqueria}
-            onChange={(e) => setEsPeluqueria(e.target.checked)}
-            className="w-5 h-5 text-orange-400 accent-orange-500 rounded"
-          />
+          <input type="checkbox" checked={esPeluqueria} onChange={(e) => setEsPeluqueria(e.target.checked)} className="w-5 h-5 text-orange-400 accent-orange-500 rounded" />
           <label className="text-sm text-white">¿Es peluquería?</label>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-white">Celular:</label>
-          <input
-            type="text"
-            value={celular}
-            onChange={(e) => setCelular(e.target.value)}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
-          />
+          <input type="text" value={celular} onChange={(e) => setCelular(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-white">Foto de perfil:</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImagen(e.target.files[0])}
-            required
-            className="mt-1 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4
-              file:rounded-full file:border-0 file:text-sm file:font-semibold
-              file:bg-orange-500 file:text-white hover:file:bg-orange-600 cursor-pointer"
-          />
+          <input type="file" accept="image/*" onChange={(e) => setImagen(e.target.files[0])} required className="mt-1 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600 cursor-pointer" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-white">Cédula:</label>
-          <input
-            type="text"
-            value={cedula}
-            onChange={(e) => setCedula(e.target.value)}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
-          />
+          <input type="text" value={cedula} onChange={(e) => setCedula(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-400 transition"
-        >
+        <button type="submit" className="w-full bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-400 transition">
           Registrar
         </button>
       </form>

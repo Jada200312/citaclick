@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Nav';
 import IniciarSesion from './pages/Inicio';
 import RegistrarUser from './pages/RegistrarUser';
-import RegistroPeluqueria from './pages/registroPeluqueria';
+import RegistroPeluqueria from './pages/RegistroPeluqueria';
 import Footer from'./components/Footer'
 import './index.css';
 
