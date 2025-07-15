@@ -2,11 +2,12 @@ import React from 'react';
 import fondoBienvenida from '../assets/indeximg.jpeg'; 
 import contentcc from '../assets/contentcc.png'; 
 
+
 const inicio = () => {
   return (
     <>
       <div
-        className="w-full h-[400px] bg-cover bg-center flex items-center px-6"
+        className="w-full h-[400px] bg-cover bg-center flex items-center px-6 py-8"
         style={{ backgroundImage: `url(${fondoBienvenida})` }}
       >
         <div className="bg-white/90 p-6 md:p-8 rounded-md shadow-md max-w-xl">

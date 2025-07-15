@@ -83,7 +83,7 @@ function Navbar() {
           >
             Registrar
           </Link>
-        )}
+        )} 
 
         {!isAuthenticated ? (
           <Link
@@ -96,16 +96,27 @@ function Navbar() {
           </Link>
         ) : (
           <>
+          
             {esPeluqueria && (
               <Link
-                to="/panel-peluqueria"
+                to="/PanelPeluqueria"
                 className={`block px-3 py-1 rounded-md transition ${
-                  isActive('/panel-peluqueria') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500'
+                  isActive('/PanelPeluqueria') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500'
                 }`}
               >
-                Panel Peluquería
+                Panel 
               </Link>
             )}
+            
+            <Link
+              to="/Perfil"
+              className={`block px-3 py-1 rounded-md transition ${
+                isActive('/Perfil') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500'
+              }`}
+            >
+              Perfil
+            </Link>
+
             <Link
               to="/reserva"
               className={`block px-3 py-1 rounded-md transition ${
@@ -116,7 +127,7 @@ function Navbar() {
             </Link>
             <button
               onClick={handleLogout}
-              className="block w-full text-left px-3 py-1 rounded-md transition"
+              className="block w-full text-left px-3 py-1 rounded-md transition hover:bg-orange-500"
             >
               Cerrar sesión
             </button>
