@@ -140,7 +140,8 @@ manejarRedireccion();
         <p className="text-base text-white leading-relaxed">Complete Los Siguientes Campos:</p>
 
         <div className="flex justify-end">
-          <button className="block text-sm font-medium text-orange-600">Iniciar Sesión</button>
+                    <button className="text-orange-600 hover:bg-orange-500 hover:text-white font-medium py-2 px-4 rounded transition-colors duration-200">Iniciar Sesión</button>
+
         </div>
 
         {/* Campos de registro */}

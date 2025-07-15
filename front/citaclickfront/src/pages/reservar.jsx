@@ -41,7 +41,7 @@ const Reservar = () => {
           />
           <button
             onClick={irABusquedaAvanzada}
-            className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            className="ml-4 bg-orange-600 hover:bg-orange-400 text-white px-4 py-2 rounded"
           >
             Búsqueda Avanzada
           </button>
@@ -68,7 +68,7 @@ const Reservar = () => {
                 <p className="text-gray-600">{peluqueria.direccion}</p>
                 <button
                   onClick={() => verHorarios(peluqueria.id)}
-                  className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                  className="mt-4 bg-orange-600 hover:bg-orange-400 text-white px-4 py-2 rounded"
                 >
                   Ver Horarios
                 </button>
