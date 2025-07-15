@@ -66,6 +66,7 @@ const Reservar = () => {
               <div className="p-4">
                 <h2 className="text-xl font-semibold">{peluqueria.nombre}</h2>
                 <p className="text-gray-600">{peluqueria.direccion}</p>
+                <p className="text-gray-600">{peluqueria.ciudad}</p>
                 <button
                   onClick={() => verHorarios(peluqueria.id)}
                   className="mt-4 bg-orange-600 hover:bg-orange-400 text-white px-4 py-2 rounded"
