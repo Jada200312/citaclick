@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Nav';
 import { AuthProvider } from './context/AuthContext.jsx';
 import Inicio from './pages/Inicio';
-import Login from './pages/Login'
+import Login from './pages/login.jsx'
 import RegistrarUser from './pages/RegistrarUser';
 import RegistroPeluqueria from './pages/RegistroPeluqueria';
 import Reservar from './pages/reservar';

@@ -2,6 +2,7 @@ import { useState, useContext } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext' // Ajusta la ruta según tu estructura
+import Logo from '../assets/log.png';
 
 function Login() {
   const navigate = useNavigate()
@@ -43,12 +44,16 @@ function Login() {
 };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Iniciar sesión</h2>
+    <div className="bg-black min-h-screen flex justify-center items-center px-6 py-4 mt-6 mb-2">
+      <div className=" space-y-3 w-full max-w-md bg-zinc-950 p-4 rounded shadow">
+        <h1 className="text-xl font-bold text-white">Bienve<span className="text-orange-500">nido</span></h1>
+        <p className="text-base text-white leading-relaxed">Bienvenido a tu sitio:</p>
+        <div className="flex justify-end">
+          <button className="text-orange-600 hover:bg-orange-500 hover:text-white font-medium py-2 px-4 rounded transition-colors duration-200">Registrarse</button>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-gray-700 font-medium mb-1">Nombre de usuario</label>
+            <label className="block text-sm font-medium text-white">Nombre de usuario</label>
             <input
               type="text"
               value={username}
@@ -58,7 +63,7 @@ function Login() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-1">Contraseña</label>
+            <label className="block text-sm font-medium text-white">Contraseña</label>
             <input
               type="password"
               value={password}
@@ -67,16 +72,20 @@ function Login() {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-orange-600 text-sm">{error}</p>}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200"
+            className="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-500 transition duration-200"
           >
             Entrar
           </button>
         </form>
       </div>
+      <div className="px-8 py-4 mt-6 mb-2">
+              <img src={Logo} alt="Logo" className="w-300 h-200" />
+            </div>
     </div>
+    
   )  
 }
 
