@@ -8,4 +8,7 @@ urlpatterns = [
     path('calificaciones/<int:pk>/', CalificacionRetrieveUpdateDestroy.as_view()),
     path('horarios/', HorarioListCreate.as_view(), name='horario-list-create'),
     path('horarios/<int:pk>/', HorarioRetrieveUpdateDestroy.as_view(), name='horario-detail'),
+    path('dias-no-disponibles/', DiaNoDisponibleListCreate.as_view(), name='dia-no-disponible-list-create'),
+    path('dias-no-disponibles/<int:pk>/', DiaNoDisponibleRetrieveUpdateDestroy.as_view(), name='dia-no-disponible-detail'),
+    path('horarios-disponibles/', HorariosDisponiblesView.as_view(), name='horarios-disponibles'),
 ]

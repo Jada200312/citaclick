@@ -5,7 +5,7 @@ import Inicio from './pages/Inicio';
 import Login from './pages/login.jsx'
 import RegistrarUser from './pages/RegistrarUser';
 import RegistroPeluqueria from './pages/RegistroPeluqueria';
-import Reservar from './pages/reservar';
+import ListadoPeluquerias from './pages/listado_peluquerias';
 import Footer from'./components/Footer'
 import './index.css';
 import PanelPeluqueria from './PagesPeluquerias/PanelPeluqueria.jsx';
@@ -14,6 +14,8 @@ import Reservas from './PagesPeluquerias/Reservas.jsx';
 import Suscripcion from './PagesPeluquerias/Suscripcion.jsx';
 import Servicios from './PagesPeluquerias/Servicios.jsx';
 import Perfil from './pages/Perfil.jsx';
+import VerHorarios from './pages/ver_horarios.jsx'
+import Reservar from './pages/reservar.jsx'
 
 
 function App() {
@@ -26,14 +28,15 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registrar" element={<RegistrarUser />} />
         <Route path="/peluqueria" element={<RegistroPeluqueria />} />
-        <Route path="/reserva" element={<Reservar />} />
+        <Route path="/listado_peluquerias" element={<ListadoPeluquerias />} />
         <Route path="/Perfil" element={<Perfil/>} />
         <Route path="/PanelPeluqueria" element={<PanelPeluqueria />} />
         <Route path="/Ganancias" element={<Ganancias />} />
         <Route path="/Reservas" element={<Reservas />} />
         <Route path="/Suscripcion" element={<Suscripcion />} />
         <Route path="/Servicios" element={<Servicios />} />
-
+        <Route path="/peluqueria/:id" element={<VerHorarios />} />
+        <Route path="/reservar" element={<Reservar />} />
       </Routes>
       <Footer/>
     </BrowserRouter>

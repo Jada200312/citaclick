@@ -118,9 +118,9 @@ function Navbar() {
             </Link>
 
             <Link
-              to="/reserva"
+              to="/listado_peluquerias"
               className={`block px-3 py-1 rounded-md transition ${
-                isActive('/reserva') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500'
+                isActive('/listado_peluquerias') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500'
               }`}
             >
               Reservar

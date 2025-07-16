@@ -1,91 +1,87 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
 
 const Reservar = () => {
-  const [peluquerias, setPeluquerias] = useState([]);
-  const [filtro, setFiltro] = useState('');
+  const location = useLocation();
   const navigate = useNavigate();
+  const { fecha, hora, peluqueriaId } = location.state;
 
-  useEffect(() => {
-    axios.get('http://localhost:8000/api/peluquerias/')
-      .then(res => setPeluquerias(res.data))
-      .catch(err => console.error('Error cargando peluquerías:', err));
-  }, []);
+  const [servicioId, setServicioId] = useState("");
+  const [mensaje, setMensaje] = useState("");
+  const [cargando, setCargando] = useState(false);
 
-  const peluqueriasFiltradas = peluquerias.filter(peluqueria =>
-    peluqueria.nombre.toLowerCase().includes(filtro.toLowerCase())
-  );
+  // Simulación del usuario logueado
+  const usuarioId = 1;
 
-  const irABusquedaAvanzada = () => {
-    navigate('/busqueda-avanzada');
+  const manejarReserva = async () => {
+    if (!servicioId) {
+      setMensaje("Por favor selecciona un servicio.");
+      return;
+    }
+  
+    setCargando(true);
+    setMensaje("");
+  
+    const token = localStorage.getItem("access_token");
+  
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/reservas/",
+        {
+          fechaReserva: fecha,
+          horaReserva: hora,
+          peluqueria: peluqueriaId,
+          servicio: servicioId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      setMensaje("✅ Reserva realizada con éxito");
+      setTimeout(() => navigate("/"), 2000);
+    } catch (error) {
+      setMensaje("❌ Error al reservar.");
+      console.error(error.response?.data || error);
+    } finally {
+      setCargando(false);
+    }
   };
-
-  const verHorarios = (id) => {
-    navigate(`/peluqueria/${id}`);
-  };
+  
 
   return (
-    <>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-white text-center">Peluquerías <span className="text-orange-500">Disponibles</span></h1>
-        <h1 className="text-3xl font-bold mb-4">Reservar una cita</h1>
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <h1 className="text-3xl font-bold mb-4">Confirmar Reserva</h1>
+      <p className="mb-2">📅 Fecha: {fecha}</p>
+      <p className="mb-2">🕒 Hora: {hora}</p>
+      <p className="mb-2">💈 Peluquería ID: {peluqueriaId}</p>
 
-      
-        <div className="flex items-center justify-between mb-6">
-          <input
-            type="text"
-            placeholder="Buscar por nombre..."
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-            className="border border-gray-300 rounded px-4 py-2 w-full max-w-5xl mx-auto"
-          />
-          <button
-            onClick={irABusquedaAvanzada}
-            className="ml-4 bg-orange-600 hover:bg-orange-400 text-white px-4 py-2 rounded"
-          >
-            Búsqueda Avanzada
-          </button>
-        </div> <br />
-
-      
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {peluqueriasFiltradas.map(peluqueria => (
-            <div key={peluqueria.id} className="bg-zinc-900 text-white rounded-xl border border-gray-300 p-6 w-full max-w-xs mx-auto text-center space-y-4 shadow-md
-">
-               <h2 className="text-xl font-semibold">{peluqueria.nombre}</h2> <hr className='border-t-2 border-orange-500 my-4'/>
-               
-               <div className="flex items-center justify-center text-white space-x-1">
-                <p>{peluqueria.direccion}</p>
-                <span>/</span>
-                <p>{peluqueria.ciudad}</p>
-              </div>
-              {peluqueria.imagen ? (
-                <img
-                src={peluqueria.imagen}
-                alt={peluqueria.nombre}
-                className="w-full h-48 object-cover"
-                />
-
-              ) : (
-                <div className="w-full h-48 bg-white flex items-center justify-center text-white">
-                  Sin imagen
-                </div>
-              )}
-              <div className="p-4">
-                <button
-                  onClick={() => verHorarios(peluqueria.id)}
-                  className="mt-4 bg-orange-600 hover:bg-orange-400 text-white px-4 py-2 rounded"
-                >
-                  Ver Horarios
-                </button> <hr className="border-t-2 border-orange-500 my-4" />
-
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="mt-4">
+        <label className="block mb-2">Selecciona un servicio:</label>
+        <select
+          value={servicioId}
+          onChange={(e) => setServicioId(e.target.value)}
+          className="text-black p-2 rounded w-full"
+        >
+          <option value="">-- Selecciona --</option>
+          <option value={1}>Corte de Cabello</option>
+          <option value={2}>Corte de Barba</option>
+        </select>
       </div>
-    </>
+
+      <button
+        onClick={manejarReserva}
+        disabled={cargando}
+        className="mt-6 bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+      >
+        {cargando ? "Reservando..." : "Confirmar Reserva"}
+      </button>
+
+      {mensaje && <p className="mt-4">{mensaje}</p>}
+    </div>
   );
 };
 

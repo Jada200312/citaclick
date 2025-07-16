@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Peluqueria, Plan, Horario, Calificacion, HistorialPago
+from .models import Peluqueria, Plan, Horario, Calificacion, HistorialPago, DiaNoDisponible
 from usuarios.models import Usuario
 
 class PlanSerializer(serializers.ModelSerializer):
@@ -34,4 +34,9 @@ class CalificacionSerializer(serializers.ModelSerializer):
 class HistorialPagoSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistorialPago
+        fields = '__all__'
+
+class DiaNoDisponibleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DiaNoDisponible
         fields = '__all__'

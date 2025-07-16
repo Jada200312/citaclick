@@ -39,3 +39,15 @@ class HistorialPago(models.Model):
     fecha_pago = models.DateField()
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     metodo_pago = models.CharField(max_length=100)
+
+class DiaNoDisponible(models.Model):
+    peluqueria = models.ForeignKey(Peluqueria, on_delete=models.CASCADE, related_name='dias_no_disponibles')
+    fecha = models.DateField()
+    motivo = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        unique_together = ('peluqueria', 'fecha')
+        ordering = ['fecha']
+
+    def __str__(self):
+        return f"{self.peluqueria.nombre} - {self.fecha} {'('+self.motivo+')' if self.motivo else ''}"
