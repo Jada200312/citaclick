@@ -59,7 +59,7 @@ class HorariosDisponiblesView(APIView):
 class PeluqueriaListCreate(generics.ListCreateAPIView):
     queryset = Peluqueria.objects.all()
     serializer_class = PeluqueriaSerializer
-    #permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
 

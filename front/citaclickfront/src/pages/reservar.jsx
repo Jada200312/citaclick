@@ -1,30 +1,56 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 const Reservar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { fecha, hora, peluqueriaId } = location.state;
+  const { fecha, hora, peluqueriaId } = location.state || {};
 
   const [servicioId, setServicioId] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
 
-  // Simulación del usuario logueado
-  const usuarioId = 1;
+  // Obtener ID del usuario desde el token JWT
+  const obtenerUsuarioDesdeToken = () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.user_id || payload.user || payload.id; // Ajusta según cómo viene el token
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  };
+
+  const usuarioId = obtenerUsuarioDesdeToken();
+
+  // Redirigir al login si no hay token
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token || !usuarioId) {
+      navigate("/login");
+    }
+  }, [navigate, usuarioId]);
 
   const manejarReserva = async () => {
     if (!servicioId) {
       setMensaje("Por favor selecciona un servicio.");
       return;
     }
-  
+
+    if (!usuarioId) {
+      setMensaje("Usuario no autenticado.");
+      return;
+    }
+
     setCargando(true);
     setMensaje("");
-  
+
     const token = localStorage.getItem("access_token");
-  
+
     try {
       const response = await axios.post(
         "http://localhost:8000/api/reservas/",
@@ -33,6 +59,7 @@ const Reservar = () => {
           horaReserva: hora,
           peluqueria: peluqueriaId,
           servicio: servicioId,
+          usuario: usuarioId,
         },
         {
           headers: {
@@ -40,7 +67,7 @@ const Reservar = () => {
           },
         }
       );
-  
+
       setMensaje("✅ Reserva realizada con éxito");
       setTimeout(() => navigate("/"), 2000);
     } catch (error) {
@@ -50,7 +77,6 @@ const Reservar = () => {
       setCargando(false);
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">

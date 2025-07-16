@@ -73,7 +73,7 @@ function Registrarpeluqueria() {
    const resPeluqueria = await fetch('http://localhost:8000/api/peluquerias/', {
   method: 'POST',
   headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`
+    Authorization: `Bearer ${localStorage.getItem('access_token')}`
   },
   body: formData
 });

@@ -1,9 +1,17 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import CalendarioHorarios from '../components/CalendarioHorarios';
 
 const VerHorarios = () => {
   const { id } = useParams(); // Captura el ID de la peluquería desde la URL
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   return (
     <div className="container mx-auto px-4 py-8">

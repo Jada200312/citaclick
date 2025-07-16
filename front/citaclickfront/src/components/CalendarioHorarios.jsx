@@ -33,27 +33,44 @@ const CalendarioHorarios = ({ peluqueriaId }) => {
       setHorarios([]);
       setError("");
 
+      const token = localStorage.getItem("access_token");
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
       try {
         const response = await axios.get(
           `http://localhost:8000/api/peluquerias/horarios-disponibles/?fecha=${format(
             fecha,
             "yyyy-MM-dd"
-          )}&peluqueria_id=${peluqueriaId}`
+          )}&peluqueria_id=${peluqueriaId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
+
         setHorarios(
           Array.isArray(response.data.horarios_disponibles)
             ? response.data.horarios_disponibles
             : []
         );
       } catch (err) {
-        setError("No se pudieron cargar los horarios.");
+        if (err.response && err.response.status === 401) {
+          navigate("/login");
+        } else {
+          setError("No se pudieron cargar los horarios.");
+        }
       } finally {
         setCargando(false);
       }
     };
 
     fetchHorarios();
-  }, [fecha, peluqueriaId]);
+  }, [fecha, peluqueriaId, navigate]);
 
   const manejarClick = (horaSeleccionada) => {
     navigate("/reservar", {
