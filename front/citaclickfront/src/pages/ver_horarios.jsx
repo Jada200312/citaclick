@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CalendarioHorarios from '../components/CalendarioHorarios';
 
 const VerHorarios = () => {
-  const { id } = useParams(); // Captura el ID de la peluquería desde la URL
+  const { id } = useParams(); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,7 +15,9 @@ const VerHorarios = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-white text-center mb-6">Selecciona una Fecha</h1>
+   <h1 className="text-xl font-bold text-white">
+          Selecciona Una <span className="text-orange-600">Fecha</span>
+        </h1>
       <CalendarioHorarios peluqueriaId={id} />
     </div>
   );

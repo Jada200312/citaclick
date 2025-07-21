@@ -19,12 +19,14 @@ function Login() {
       username,
       password,
     });
-
+console.log(response.data);
     const { access, refresh } = response.data;
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
+    
 
-    // ⚠️ Obtener los datos del usuario autenticado
+
+   
     const userResponse = await axios.get('http://localhost:8000/api/usuarios/tipo-usuario-logueado/', {
       headers: {
         Authorization: `Bearer ${access}`,
@@ -32,8 +34,7 @@ function Login() {
     });
 
     const user = userResponse.data;
-
-    // Guarda la info necesaria (como es_peluqueria) en localStorage
+  
     localStorage.setItem('es_peluqueria', user.es_peluqueria);
 
     navigate('/');

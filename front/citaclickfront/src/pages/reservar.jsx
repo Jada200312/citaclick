@@ -27,7 +27,6 @@ const Reservar = () => {
 
   const usuarioId = obtenerUsuarioDesdeToken();
 
-  // Redirigir al login si no hay token
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token || !usuarioId) {
@@ -79,20 +78,23 @@ const Reservar = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <h1 className="text-3xl font-bold mb-4">Confirmar Reserva</h1>
-      <p className="mb-2">📅 Fecha: {fecha}</p>
-      <p className="mb-2">🕒 Hora: {hora}</p>
-      <p className="mb-2">💈 Peluquería ID: {peluqueriaId}</p>
+   <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-2">
+    <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-xl">
+      <h1 className="text-xl font-bold">
+          Confirmar <span className="text-orange-500">Reserva</span>
+        </h1> <br />
+      <p className="mb-2 text-black">📅 Fecha: {fecha}</p>
+      <p className="mb-2 text-black">🕒 Hora: {hora}</p>
+      <p className="mb-2 text-black">💈 Peluquería ID: {peluqueriaId}</p>
 
       <div className="mt-4">
-        <label className="block mb-2">Selecciona un servicio:</label>
+        <label className="">Selecciona un servicio:</label>
         <select
           value={servicioId}
           onChange={(e) => setServicioId(e.target.value)}
-          className="text-black p-2 rounded w-full"
+          className="text-black p-2 rounded w-full block mb-2 border"
         >
-          <option value="">-- Selecciona --</option>
+          <option value="">Selecciona</option>
           <option value={1}>Corte de Cabello</option>
           <option value={2}>Corte de Barba</option>
         </select>
@@ -101,13 +103,14 @@ const Reservar = () => {
       <button
         onClick={manejarReserva}
         disabled={cargando}
-        className="mt-6 bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+        className="mt-6 bg-orange-600 hover:bg-orange-500 px-4 py-2 rounded"
       >
         {cargando ? "Reservando..." : "Confirmar Reserva"}
       </button>
 
       {mensaje && <p className="mt-4">{mensaje}</p>}
     </div>
+  </div>
   );
 };
 

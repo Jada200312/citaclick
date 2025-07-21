@@ -125,6 +125,7 @@ function Navbar() {
             >
               Reservar
             </Link>
+            
             <button
               onClick={handleLogout}
               className="block w-full text-left px-3 py-1 rounded-md transition hover:bg-orange-500"
