@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from .views import *
 
 urlpatterns = [
@@ -11,4 +12,7 @@ urlpatterns = [
     path('dias-no-disponibles/', DiaNoDisponibleListCreate.as_view(), name='dia-no-disponible-list-create'),
     path('dias-no-disponibles/<int:pk>/', DiaNoDisponibleRetrieveUpdateDestroy.as_view(), name='dia-no-disponible-detail'),
     path('horarios-disponibles/', HorariosDisponiblesView.as_view(), name='horarios-disponibles'),
+    path('ganancias/', GananciasListView.as_view(), name='ganancias'),
+    path('planes/', views.lista_planes, name='lista_planes'),
+
 ]

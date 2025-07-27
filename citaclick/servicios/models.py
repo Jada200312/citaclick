@@ -11,3 +11,4 @@ class Servicio(models.Model):
     imagen = models.ImageField(upload_to='servicios/', null=True, blank=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
     peluqueria = models.ForeignKey(Peluqueria, on_delete=models.CASCADE)
+

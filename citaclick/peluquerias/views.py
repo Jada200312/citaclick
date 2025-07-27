@@ -8,6 +8,9 @@ from datetime import datetime, timedelta
 from .models import Peluqueria, DiaNoDisponible
 from reservas.models import Reserva
 from django.utils.dateparse import parse_date
+from rest_framework.permissions import AllowAny
+from django.http import JsonResponse
+
 
 class HorariosDisponiblesView(APIView):
     permission_classes = [permissions.AllowAny]  # Cambia según lo necesites
@@ -96,3 +99,32 @@ class DiaNoDisponibleRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
     queryset = DiaNoDisponible.objects.all()
     serializer_class = DiaNoDisponibleSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class GananciasListView(APIView):
+    permission_classes = [AllowAny]  # o [AllowAny] si no hay login
+
+    def get(self, request):
+        pagos = HistorialPago.objects.all().order_by('fecha_pago')
+        data = [
+            {
+                "fecha": pago.fecha_pago,
+                "monto": pago.monto
+            }
+            for pago in pagos
+        ]
+        return Response(data)
+    
+def lista_planes(request):
+    planes = Plan.objects.all()
+    data = [
+        {
+            'id': plan.id,
+            'nombre': plan.nombre,
+            'descripcion': plan.descripcion,
+            'precio': str(plan.precio),
+            'limite_reservas': plan.limite_reservas,
+            'comision': str(plan.comision),
+        }
+        for plan in planes
+    ]
+    return JsonResponse(data, safe=False)

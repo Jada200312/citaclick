@@ -7,15 +7,15 @@ import reservas from '../assets/Reservas.png';
 import suscripciones from '../assets/Suscripcion.png';
 import gestionservice from '../assets/servicios.png';
 
-const opciones = [
-  { nombre: 'Ganancias', imagen: ganancias, ruta: '/ganancias' },
-  { nombre: 'Reservas', imagen: reservas, ruta: '/Reservas' },
-  { nombre: 'Suscripción', imagen: suscripciones, ruta: '/Suscripcion' },
-  { nombre: 'Gestionar Servicio', imagen: gestionservice, ruta: '/servicios' }
-];
-
-const MenuPrincipal = () => {
+const MenuPrincipal = ({ peluqueriaId }) => {
   const navigate = useNavigate();
+
+  const opciones = [
+    { nombre: 'Ganancias', imagen: ganancias, ruta: '/ganancias' },
+    { nombre: 'Reservas', imagen: reservas, ruta: `/Reservas/${4}` }, //hacer dinamico esto
+    { nombre: 'Suscripción', imagen: suscripciones, ruta: '/Suscripcion' },
+    { nombre: 'Gestionar Servicio', imagen: gestionservice, ruta: '/servicios' }
+  ];
 
   return (
     <div className="flex flex-wrap justify-center gap-6 bg-black py-10">
