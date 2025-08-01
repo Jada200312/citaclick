@@ -1,6 +1,41 @@
-import React from 'react';
+// src/pages/Servicios.jsx
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import agregar from '../assets/agregar.png';
+import editar from '../assets/editar.png';
 
 const Servicios = () => {
+  const navigate = useNavigate();
+
+  // 🔹 Obtener ID usuario desde token JWT
+  const obtenerUsuarioDesdeToken = () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.user_id || payload.user || payload.id;
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  };
+
+  const usuarioId = obtenerUsuarioDesdeToken();
+  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true"; // Ajusta según backend
+
+  // 🔹 Validar acceso
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token || !usuarioId) {
+      navigate("/login"); // No autenticado
+    } else if (!esPeluqueria) {
+      navigate("/"); // No es peluquería
+    }
+  }, [navigate, usuarioId, esPeluqueria]);
+
   return (
     <div className="bg-black min-h-screen text-white p-6">
       <h2 className="text-4xl font-bold mb-10 text-center">
@@ -10,11 +45,11 @@ const Servicios = () => {
       <div className="flex flex-wrap justify-center gap-12 items-center">
         {/* Botón completo: Agregar */}
         <button
-          onClick={() => window.location.href = '/agregar'}
+          onClick={() => navigate('/agregar')}
           className="w-[28rem] h-96 bg-[#fd6f01] p-6 rounded-xl shadow-md flex flex-col items-center justify-center transition hover:scale-105"
         >
           <img
-            src="../src/assets/agregar.png"
+            src={agregar}
             alt="Agregar"
             className="max-w-[150px] h-auto mb-6"
           />
@@ -23,11 +58,11 @@ const Servicios = () => {
 
         {/* Botón completo: Editar */}
         <button
-          onClick={() => window.location.href = '/editaroeliminar'}
+          onClick={() => navigate('/editaroeliminar')}
           className="w-[28rem] h-96 bg-[#fd6f01] p-6 rounded-xl shadow-md flex flex-col items-center justify-center transition hover:scale-105"
         >
           <img
-            src="../src/assets/editar.png"
+            src={editar}
             alt="Editar"
             className="max-w-[150px] h-auto mb-6"
           />

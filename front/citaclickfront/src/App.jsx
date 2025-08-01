@@ -34,7 +34,7 @@ function App() {
           <Route path="/Perfil" element={<Perfil />} />
           <Route path="/PanelPeluqueria" element={<PanelPeluqueria />} />
           <Route path="/Ganancias" element={<Ganancias />} />
-          <Route path="/Reservas/:id" element={<Reservas />} />
+          <Route path="/Reservas" element={<Reservas />} />
           <Route path="/Suscripcion" element={<Suscripcion />} />
           <Route path="/Servicios" element={<Servicios />} />
           <Route path="/peluqueria/:id" element={<VerHorarios />} />

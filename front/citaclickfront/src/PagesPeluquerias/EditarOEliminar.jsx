@@ -4,8 +4,36 @@ import { useNavigate } from 'react-router-dom';
 const EditarOEliminar = () => {
   const [servicios, setServicios] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);  // Al inicio no hay categoría seleccionada
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
   const navigate = useNavigate();
+
+  // 🔹 Obtener ID usuario desde token JWT
+  const obtenerUsuarioDesdeToken = () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.user_id || payload.user || payload.id;
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  };
+
+  const usuarioId = obtenerUsuarioDesdeToken();
+  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true"; 
+
+  // 🔹 Validar acceso
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token || !usuarioId) {
+      navigate("/login"); // No autenticado
+    } else if (!esPeluqueria) {
+      navigate("/"); // No es peluquería → fuera
+    }
+  }, [navigate, usuarioId, esPeluqueria]);
 
   // Cargar servicios
   useEffect(() => {
@@ -26,9 +54,9 @@ const EditarOEliminar = () => {
   // Filtra servicios por categoría
   const filtrarServicios = () => {
     if (!categoriaSeleccionada) {
-      return servicios; // Si no hay categoría seleccionada, mostramos todos
+      return servicios;
     }
-    return servicios.filter(s => s.categoria === categoriaSeleccionada);  // Filtramos por ID de categoría
+    return servicios.filter(s => s.categoria === categoriaSeleccionada);
   };
 
   const handleEliminar = async (id) => {
@@ -57,7 +85,7 @@ const EditarOEliminar = () => {
       <div className="flex justify-center gap-4 mb-10 flex-wrap">
         {/* Botón Todos */}
         <button
-          onClick={() => setCategoriaSeleccionada(null)}  // Al seleccionar 'Todos', ponemos null
+          onClick={() => setCategoriaSeleccionada(null)}
           className={`px-4 py-2 rounded-full border ${
             categoriaSeleccionada === null
               ? 'bg-orange-500 text-white'
@@ -69,7 +97,7 @@ const EditarOEliminar = () => {
 
         {/* Botón Corte de Cabello */}
         <button
-          onClick={() => setCategoriaSeleccionada(1)}  // Asumimos que 'Corte de Cabello' tiene ID 1
+          onClick={() => setCategoriaSeleccionada(1)}
           className={`px-4 py-2 rounded-full border ${
             categoriaSeleccionada === 1
               ? 'bg-orange-500 text-white'
@@ -81,7 +109,7 @@ const EditarOEliminar = () => {
 
         {/* Botón Barba */}
         <button
-          onClick={() => setCategoriaSeleccionada(2)}  // Asumimos que 'Barba' tiene ID 2
+          onClick={() => setCategoriaSeleccionada(2)}
           className={`px-4 py-2 rounded-full border ${
             categoriaSeleccionada === 2
               ? 'bg-orange-500 text-white'
@@ -95,7 +123,7 @@ const EditarOEliminar = () => {
         {categorias.map(cat => (
           <button
             key={cat.id}
-            onClick={() => setCategoriaSeleccionada(cat.id)}  // Usamos el ID de la categoría
+            onClick={() => setCategoriaSeleccionada(cat.id)}
             className={`px-4 py-2 rounded-full border ${
               categoriaSeleccionada === cat.id
                 ? 'bg-orange-500 text-white'
@@ -114,11 +142,17 @@ const EditarOEliminar = () => {
             key={servicio.id}
             className="bg-white text-black rounded-lg overflow-hidden shadow-md w-72 mx-auto"
           >
-            <img
-              src={servicio.imagen ? `http://localhost:8000${servicio.imagen}` : 'https://via.placeholder.com/280x240?text=Sin+imagen'}
-              alt={servicio.nombre}
-              className="w-full h-60 object-cover"
-            />
+            {servicio.imagen ? (
+              <img
+                src={servicio.imagen}
+                alt={servicio.nombre}
+                className="w-full h-48 object-cover"
+              />
+            ) : (
+              <div className="w-full h-48 bg-white flex items-center justify-center text-white">
+                Sin imagen
+              </div>
+            )}
             <div className="p-4 text-center">
               <h3 className="font-semibold text-xl">{servicio.nombre}</h3>
               <p className="text-gray-700">${servicio.precio}</p>

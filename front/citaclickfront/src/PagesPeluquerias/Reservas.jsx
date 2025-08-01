@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format, addDays, isBefore, parse } from "date-fns";
-import { useParams } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 const formatearHora = (hora24) => {
   const parsed = parse(hora24, "HH:mm", new Date());
@@ -9,10 +9,38 @@ const formatearHora = (hora24) => {
 };
 
 const Reservas = () => {
-  const { id } = useParams();              
-  const peluqueriaId = id;                 
+  const navigate = useNavigate();
 
-  const [diaActivo, setDiaActivo] = useState(0); // 0 = hoy, 1 = mañana, 2 = pasado
+  // 🔹 Obtener ID usuario desde token JWT
+  const obtenerUsuarioDesdeToken = () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.user_id || payload.user || payload.id;
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  };
+
+  const usuarioId = obtenerUsuarioDesdeToken();
+  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
+  const peluqueriaId = localStorage.getItem("peluqueria_id"); // 🔹 ID de la peluquería logueada
+
+  // 🔹 Validar acceso
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token || !usuarioId) {
+      navigate("/login");
+    } else if (!esPeluqueria) {
+      navigate("/");
+    }
+  }, [navigate, usuarioId, esPeluqueria]);
+
+  const [diaActivo, setDiaActivo] = useState(0);
   const [horarios, setHorarios] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
@@ -22,6 +50,8 @@ const Reservas = () => {
 
   useEffect(() => {
     const fetchHorarios = async () => {
+      if (!peluqueriaId) return; // 🔹 Evita llamar si no hay peluquería logueada
+
       setCargando(true);
       setHorarios([]);
       setError("");
@@ -46,7 +76,7 @@ const Reservas = () => {
       }
     };
 
-    if (peluqueriaId) fetchHorarios();
+    fetchHorarios();
   }, [diaActivo, peluqueriaId]);
 
   return (
@@ -88,11 +118,7 @@ const Reservas = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-zinc-950 px-4 py-6 my-6 mx-4 rounded-lg">
           {horarios.map((hora) => {
             const ahora = new Date();
-            const horaCompleta = parse(
-              hora.hora,
-              "HH:mm",
-              fechaSeleccionada
-            );
+            const horaCompleta = parse(hora.hora, "HH:mm", fechaSeleccionada);
 
             const esHoy =
               format(fechaSeleccionada, "yyyy-MM-dd") ===

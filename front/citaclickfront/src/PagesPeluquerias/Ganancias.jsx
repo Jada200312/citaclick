@@ -1,16 +1,56 @@
+// src/pages/Ganancias.jsx
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import 'chart.js/auto';
 
 const Ganancias = () => {
   const [ganancias, setGanancias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
+  // 🔹 Obtener ID usuario desde token JWT
+  const obtenerUsuarioDesdeToken = () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.user_id || payload.user || payload.id;
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  };
+
+  const usuarioId = obtenerUsuarioDesdeToken();
+  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
+
+  // 🔹 Validar acceso
   useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token || !usuarioId) {
+      navigate("/login"); // No autenticado
+      return;
+    }
+    if (!esPeluqueria) {
+      navigate("/"); // No es peluquería → fuera
+      return;
+    }
+
+    // 🔹 Cargar ganancias solo si pasa validación
     const fetchGanancias = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/peluquerias/ganancias/');
+        const response = await axios.get(
+          'http://localhost:8000/api/peluquerias/ganancias/',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
         const sortedData = response.data.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
         setGanancias(sortedData);
         setLoading(false);
@@ -19,11 +59,12 @@ const Ganancias = () => {
         setLoading(false);
       }
     };
+
     fetchGanancias();
-  }, []);
+  }, [navigate, usuarioId, esPeluqueria]);
 
   if (loading) {
-    return <div>Cargando...</div>;
+    return <div className="text-center text-white py-20">Cargando...</div>;
   }
 
   const data = {
@@ -56,7 +97,7 @@ const Ganancias = () => {
             family: 'Poppins, sans-serif',
             weight: 'bold',
           },
-          color: '#333',
+          color: '#fff',
         },
       },
       tooltip: {
@@ -76,7 +117,7 @@ const Ganancias = () => {
           },
         },
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: 'rgba(255, 255, 255, 0.1)',
         },
       },
       x: {
@@ -88,7 +129,7 @@ const Ganancias = () => {
           },
         },
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: 'rgba(255, 255, 255, 0.1)',
         },
       },
     },

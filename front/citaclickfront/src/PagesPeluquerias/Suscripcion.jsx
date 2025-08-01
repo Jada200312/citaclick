@@ -1,3 +1,4 @@
+// src/pages/Suscripcion.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -6,10 +7,39 @@ const Suscripcion = () => {
   const [planes, setPlanes] = useState([]);
   const navigate = useNavigate();
 
+  // 🔹 Obtener ID usuario desde token JWT
+  const obtenerUsuarioDesdeToken = () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.user_id || payload.user || payload.id;
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  };
+
+  const usuarioId = obtenerUsuarioDesdeToken();
+  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true"; // o ajusta según backend
+
+  // 🔹 Validar acceso
   useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token || !usuarioId) {
+      navigate("/login"); // No autenticado
+      return;
+    }
+    if (!esPeluqueria) {
+      navigate("/"); // No es peluquería → fuera
+      return;
+    }
+
+    // 🔹 Si pasa validación → cargar planes
     const fetchPlanes = async () => {
       try {
-        const token = localStorage.getItem('access_token');
         const response = await axios.get('http://localhost:8000/api/peluquerias/planes/', {
           headers: {
             Authorization: `Bearer ${token}`
@@ -22,7 +52,7 @@ const Suscripcion = () => {
     };
 
     fetchPlanes();
-  }, []);
+  }, [navigate, usuarioId, esPeluqueria]);
 
   const handleSeleccionar = (planId) => {
     navigate(`/activar/${planId}`);
@@ -35,7 +65,7 @@ const Suscripcion = () => {
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-7xl mx-auto">
-        {planes.map((plan, index) => (
+        {planes.map((plan) => (
           <div
             key={plan.id}
             className="bg-white text-black rounded-3xl shadow-lg p-10 flex flex-col justify-between text-center min-h-[450px] hover:shadow-2xl transition-shadow duration-300"
