@@ -10,6 +10,66 @@ from reservas.models import Reserva
 from django.utils.dateparse import parse_date
 from rest_framework.permissions import AllowAny
 from django.http import JsonResponse
+from django.db.models import Avg
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from .models import Peluqueria, Calificacion
+from datetime import date
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def calificar_peluqueria(request, pk):
+    print("📦 Datos recibidos:", request.data)
+
+    try:
+        peluqueria = Peluqueria.objects.get(pk=pk)
+    except Peluqueria.DoesNotExist:
+        return Response({"error": "Peluquería no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+
+    calificacion_valor = request.data.get("calificacion")
+    comentario = request.data.get("comentario", "")
+
+    if not calificacion_valor:
+        return Response({"error": "Debe enviar una calificación"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 📌 Verificar si ya calificó este mes
+    hoy = date.today()
+    ya_califico = Calificacion.objects.filter(
+        peluqueria=peluqueria,
+        usuario=request.user,
+        fecha__year=hoy.year,
+        fecha__month=hoy.month
+    ).exists()
+
+    if ya_califico:
+        return Response(
+            {"error": "Ya calificaste esta peluquería este mes"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # 📌 Crear calificación
+    calificacion = Calificacion.objects.create(
+        peluqueria=peluqueria,
+        usuario=request.user,
+        calificacion=calificacion_valor,
+        comentario=comentario,
+        fecha=hoy  # asegurar que se guarda la fecha actual
+    )
+
+    serializer = CalificacionSerializer(calificacion)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class PromedioCalificacionesView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, peluqueria_id):
+        promedio = Calificacion.objects.filter(peluqueria_id=peluqueria_id).aggregate(promedio=Avg('puntuacion'))['promedio']
+        return Response({
+            "peluqueria_id": peluqueria_id,
+            "promedio": round(promedio, 2) if promedio else None
+        })
+
 
 
 class HorariosDisponiblesView(APIView):
@@ -74,6 +134,24 @@ class PeluqueriaRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 class CalificacionListCreate(generics.ListCreateAPIView):
     queryset = Calificacion.objects.all()
     serializer_class = CalificacionSerializer
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        peluqueria_id = request.data.get("peluqueria")
+
+        if peluqueria_id:
+            try:
+                peluqueria = Peluqueria.objects.get(id=peluqueria_id)
+                peluqueria_serializer = PeluqueriaSerializer(peluqueria)
+                return Response(peluqueria_serializer.data, status=status.HTTP_201_CREATED)
+            except Peluqueria.DoesNotExist:
+                pass
+
+        return response
+
 
 class CalificacionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = Calificacion.objects.all()

@@ -1,11 +1,9 @@
 import { useState, useContext } from 'react'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import Logo from '../assets/log.png';
 
 function Login() {
-  const navigate = useNavigate()
   const { login } = useContext(AuthContext)
 
   const [username, setUsername] = useState('')
@@ -15,15 +13,13 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // 1️⃣ Hacer login
+      // 1️⃣ Hacer login al backend
       const response = await axios.post('http://localhost:8000/api/token/', {
         username,
         password,
       });
 
       const { access, refresh } = response.data;
-      localStorage.setItem('access_token', access);
-      localStorage.setItem('refresh_token', refresh);
 
       // 2️⃣ Obtener datos completos del usuario
       const userResponse = await axios.get('http://localhost:8000/api/usuarios/tipo-usuario-logueado/', {
@@ -34,15 +30,20 @@ function Login() {
 
       const user = userResponse.data;
 
-      // 3️⃣ Guardar en localStorage
+      // 3️⃣ Guardar datos extras en localStorage (opcionales)
       localStorage.setItem('user_id', user.id);
       localStorage.setItem('es_peluqueria', user.es_peluqueria);
       if (user.peluqueria_id) {
         localStorage.setItem('peluqueria_id', user.peluqueria_id);
       }
 
-      // 4️⃣ Redirigir
-      navigate('/');
+      // 4️⃣ Pasar todo al contexto de Auth
+      login({
+        ...user,
+        access,
+        refresh
+      });
+
     } catch (err) {
       console.error(err);
       setError('Credenciales incorrectas');
@@ -55,7 +56,11 @@ function Login() {
         <h1 className="text-xl font-bold text-white">Bienve<span className="text-orange-500">nido</span></h1>
         <p className="text-base text-white leading-relaxed">Bienvenido a tu sitio:</p>
         <div className="flex justify-end">
-          <button className="text-orange-600 hover:bg-orange-500 hover:text-white font-medium py-2 px-4 rounded transition-colors duration-200">Registrarse</button>
+          <button
+            className="text-orange-600 hover:bg-orange-500 hover:text-white font-medium py-2 px-4 rounded transition-colors duration-200"
+          >
+            Registrarse
+          </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>

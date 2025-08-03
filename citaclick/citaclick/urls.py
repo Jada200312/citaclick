@@ -27,9 +27,7 @@ urlpatterns = [
     path('api/servicios/', include('servicios.urls')),
     path('api/reservas/', include('reservas.urls')),
     path('api/token/', TokenObtainPairView.as_view()),
-    path('api/peluquerias/', include('peluquerias.urls')),
     path('api/token/refresh/', TokenRefreshView.as_view()),
-    path('api/peluquerias/', include('peluquerias.urls')),
 ]
 
 if settings.DEBUG:

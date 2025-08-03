@@ -4,6 +4,7 @@ from .views import *
 
 urlpatterns = [
     path('', PeluqueriaListCreate.as_view()),
+    path('<int:pk>/calificar/', views.calificar_peluqueria, name='calificar-peluqueria'),
     path('<int:pk>/', PeluqueriaRetrieveUpdateDestroy.as_view()),
     path('calificaciones/', CalificacionListCreate.as_view()),
     path('calificaciones/<int:pk>/', CalificacionRetrieveUpdateDestroy.as_view()),
@@ -14,5 +15,5 @@ urlpatterns = [
     path('horarios-disponibles/', HorariosDisponiblesView.as_view(), name='horarios-disponibles'),
     path('ganancias/', GananciasListView.as_view(), name='ganancias'),
     path('planes/', views.lista_planes, name='lista_planes'),
-
+    path('calificaciones/promedio/<int:peluqueria_id>/', PromedioCalificacionesView.as_view(), name='promedio-calificaciones'),
 ]
