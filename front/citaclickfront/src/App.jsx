@@ -19,6 +19,7 @@ import Servicios from './PagesPeluquerias/Servicios.jsx';
 import Agregar from './PagesPeluquerias/Agregar';
 import EditarOEliminar from './PagesPeluquerias/EditarOEliminar.jsx';
 import Editar from './PagesPeluquerias/Editar.jsx';
+import BusquedaAvanzadaPeluquerias from './pages/BusquedaAvanzadaPeluquerias.jsx';
 
 import './index.css';
 
@@ -37,7 +38,7 @@ function App() {
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/peluqueria/:id" element={<VerHorarios />} />
           <Route path="/reservar" element={<Reservar />} />
-
+          <Route path="/busqueda-avanzada" element={<BusquedaAvanzadaPeluquerias />} />
           {/* Panel Peluquería */}
           <Route path="/panelpeluqueria" element={<PanelPeluqueria />} />
           <Route path="/ganancias" element={<Ganancias />} />

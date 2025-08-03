@@ -67,6 +67,7 @@ const ListadoPeluquerias = () => {
         setShowModal(false);
         setComentario("");
         fetchPeluquerias();
+        window.location.reload();
       })
       .catch((err) => {
         console.error("Error al enviar calificación:", err);
@@ -80,26 +81,44 @@ const ListadoPeluquerias = () => {
 
   const renderStars = (peluqueriaId, rating) => {
     const totalStars = 5;
-    const currentRating = selectedRatings[peluqueriaId] ?? Math.floor(rating);
+    const currentRating = selectedRatings[peluqueriaId] ?? rating;
+  
     return (
       <div className="flex justify-center items-center">
         {[...Array(totalStars)].map((_, index) => {
           const starValue = index + 1;
+          let fillPercentage = 0;
+  
+          if (starValue <= Math.floor(currentRating)) {
+            fillPercentage = 100; // estrella llena
+          } else if (starValue - 1 < currentRating && starValue > currentRating) {
+            // estrella parcial
+            fillPercentage = (currentRating - (starValue - 1)) * 100;
+          }
+  
           return (
-            <Star
+            <div
               key={index}
+              className="relative w-5 h-5"
               onClick={() => handleStarClick(peluqueriaId, starValue)}
-              className={`w-5 h-5 cursor-pointer ${
-                starValue <= currentRating
-                  ? "text-yellow-400 fill-yellow-400"
-                  : "text-gray-400"
-              }`}
-            />
+            >
+              {/* Estrella gris vacía */}
+              <Star className="w-5 h-5 text-gray-400 absolute top-0 left-0" />
+  
+              {/* Estrella rellena con clip parcial */}
+              <div
+                className="absolute top-0 left-0 overflow-hidden"
+                style={{ width: `${fillPercentage}%` }}
+              >
+                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+              </div>
+            </div>
           );
         })}
       </div>
     );
   };
+  
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -167,7 +186,7 @@ const ListadoPeluquerias = () => {
                   peluqueria.promedio_calificaciones
                 )}
                 <p className="text-yellow-400 font-bold">
-                  {peluqueria.promedio_calificaciones} / 5
+                  {peluqueria.promedio_calificaciones?.toFixed(1)} / 5
                 </p>
                 <p className="text-sm text-gray-400">
                   ({peluqueria.total_calificaciones} reseñas)

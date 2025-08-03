@@ -15,6 +15,70 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import Peluqueria, Calificacion
 from datetime import date
+from reservas.models import Reserva
+from django.db.models import Q
+
+class BuscarPeluqueriasDisponibles(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        fecha_str = request.GET.get("fecha")
+        hora_str = request.GET.get("hora")
+
+        if not fecha_str or not hora_str:
+            return Response({"error": "Los parámetros 'fecha' y 'hora' son requeridos."}, status=400)
+
+        fecha = parse_date(fecha_str)
+        try:
+            hora = datetime.strptime(hora_str, "%H:%M").time()
+        except ValueError:
+            return Response({"error": "Formato de hora inválido. Usa HH:MM."}, status=400)
+
+        peluquerias_disponibles = []
+
+        for peluqueria in Peluqueria.objects.all():
+            
+            horario = peluqueria.horario
+            if not horario:
+                continue
+
+            # Día no disponible
+            if DiaNoDisponible.objects.filter(peluqueria=peluqueria, fecha=fecha).exists():
+                continue
+
+            # Verificar si la hora corresponde a un bloque exacto basado en intervalo_tiempo
+            hora_inicio = datetime.combine(fecha, horario.horaInicio)
+            hora_fin = datetime.combine(fecha, horario.horaFin)
+            intervalo = timedelta(minutes=horario.intervalo_tiempo)
+
+            bloque_encontrado = False
+            actual = hora_inicio
+
+            while actual + intervalo <= hora_fin:
+                bloque = actual.time()
+                if bloque == hora:
+                    bloque_encontrado = True
+                    break
+                actual += intervalo
+
+            if not bloque_encontrado:
+                continue
+
+            # Ya hay reserva en ese bloque
+            ya_reservado = Reserva.objects.filter(
+                peluqueria=peluqueria,
+                fechaReserva=fecha,
+                horaReserva=hora
+            ).exists()
+            if ya_reservado:
+                continue
+            
+            peluquerias_disponibles.append(peluqueria)
+
+        serializer = PeluqueriaSerializer(peluquerias_disponibles, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

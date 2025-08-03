@@ -16,4 +16,5 @@ urlpatterns = [
     path('ganancias/', GananciasListView.as_view(), name='ganancias'),
     path('planes/', views.lista_planes, name='lista_planes'),
     path('calificaciones/promedio/<int:peluqueria_id>/', PromedioCalificacionesView.as_view(), name='promedio-calificaciones'),
+    path('buscar-disponibles/', BuscarPeluqueriasDisponibles.as_view(), name='buscar-peluquerias-disponibles'),
 ]
