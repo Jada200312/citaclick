@@ -12,10 +12,22 @@ const Editar = () => {
   const [imagen, setImagen] = useState(null);
   const [imagenActual, setImagenActual] = useState('');
 
+  const token = localStorage.getItem('access_token');
+  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
   const peluqueriaId = localStorage.getItem("peluqueria_id");
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/servicios/categorias/')
+    if (!token || !esPeluqueria) {
+      navigate("/login");
+    }
+  }, [token, esPeluqueria, navigate]);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/servicios/categorias/', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
       .then(res => {
         if (!res.ok) throw new Error('Error al cargar categorías');
         return res.json();
@@ -25,10 +37,14 @@ const Editar = () => {
         console.error(err);
         alert('No se pudieron cargar las categorías');
       });
-  }, []);
+  }, [token]);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/servicios/${id}/`)
+    fetch(`http://localhost:8000/api/servicios/${id}/`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
       .then(res => {
         if (!res.ok) throw new Error('Error al cargar el servicio');
         return res.json();
@@ -41,12 +57,18 @@ const Editar = () => {
       })
       .catch(err => {
         alert('Error al cargar el servicio');
+        console.error(err);
         navigate('/editaroeliminar');
       });
-  }, [id, navigate]);
+  }, [id, token, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!peluqueriaId) {
+      alert("No se pudo identificar la peluquería. Vuelve a iniciar sesión.");
+      return;
+    }
 
     const formData = new FormData();
     formData.append('nombre', nombre);
@@ -58,6 +80,9 @@ const Editar = () => {
     try {
       const response = await fetch(`http://localhost:8000/api/servicios/${id}/`, {
         method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
         body: formData,
       });
 

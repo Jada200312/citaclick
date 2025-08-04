@@ -4,7 +4,10 @@ import { useNavigate } from "react-router-dom";
 
 const obtenerUsuarioDesdeToken = () => {
   const token = localStorage.getItem("access_token");
-  if (!token) return null;
+  if (!token) {
+    navigate("/login");
+    return;
+  }
 
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));

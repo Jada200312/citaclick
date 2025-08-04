@@ -11,19 +11,19 @@ const Ganancias = () => {
 
   const [anios, setAnios] = useState([]);
   const [meses, setMeses] = useState([]);
-  const [dias, setDias] = useState([]);
 
   const [anioSeleccionado, setAnioSeleccionado] = useState('');
   const [mesSeleccionado, setMesSeleccionado] = useState('');
-  const [diaSeleccionado, setDiaSeleccionado] = useState('');
   const [tipoFiltro, setTipoFiltro] = useState('diario');
 
   const navigate = useNavigate();
 
-  // Decodificar token para obtener ID usuario
   const obtenerUsuarioDesdeToken = () => {
     const token = localStorage.getItem("access_token");
-    if (!token) return null;
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
@@ -37,7 +37,6 @@ const Ganancias = () => {
   const usuarioId = obtenerUsuarioDesdeToken();
   const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
 
-  // Validar acceso y cargar años
   useEffect(() => {
     if (!usuarioId) {
       navigate("/login");
@@ -87,31 +86,10 @@ const Ganancias = () => {
   };
 
   useEffect(() => {
-    if (anioSeleccionado && mesSeleccionado && tipoFiltro === 'diario') {
-      cargarDias(anioSeleccionado, mesSeleccionado);
-    }
-  }, [anioSeleccionado, mesSeleccionado, tipoFiltro]);
-
-  const cargarDias = async (anio, mes) => {
-    try {
-      const response = await axios.get(`http://localhost:8000/api/reservas/fechas/dias/?anio=${anio}&mes=${mes}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
-      });
-      setDias(response.data.dias);
-      if (response.data.dias.length > 0) {
-        setDiaSeleccionado(response.data.dias[0]);
-      }
-    } catch (error) {
-      console.error("Error cargando días", error);
-    }
-  };
-
-  // Cargar ganancias
-  useEffect(() => {
     if (anioSeleccionado) {
       cargarGanancias();
     }
-  }, [anioSeleccionado, mesSeleccionado, diaSeleccionado, tipoFiltro]);
+  }, [anioSeleccionado, mesSeleccionado, tipoFiltro]);
 
   const cargarGanancias = async () => {
     setLoading(true);
@@ -120,9 +98,6 @@ const Ganancias = () => {
     if (tipoFiltro === 'diario') {
       if (!anioSeleccionado || !mesSeleccionado) return;
       fechaFiltro = `${anioSeleccionado}-${String(mesSeleccionado).padStart(2, '0')}`;
-      if (diaSeleccionado) {
-        fechaFiltro += `-${String(diaSeleccionado).padStart(2, '0')}`;
-      }
     } else if (tipoFiltro === 'mensual') {
       if (!anioSeleccionado || !mesSeleccionado) return;
       fechaFiltro = `${anioSeleccionado}-${String(mesSeleccionado).padStart(2, '0')}`;
@@ -150,6 +125,12 @@ const Ganancias = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFiltroChange = (e) => {
+    const nuevoFiltro = e.target.value;
+    setTipoFiltro(nuevoFiltro);
+    setMesSeleccionado('');
   };
 
   const options = {
@@ -196,30 +177,25 @@ const Ganancias = () => {
       {/* Selectores */}
       <div className="flex flex-wrap justify-center gap-4 mb-6">
         <select className="bg-gray-800 text-white p-2 rounded"
-          value={tipoFiltro} onChange={e => setTipoFiltro(e.target.value)}>
+          value={tipoFiltro} onChange={handleFiltroChange}>
           <option value="diario">Diario</option>
           <option value="mensual">Mensual</option>
           <option value="anual">Anual</option>
         </select>
 
-        {anios.length > 0 && (
+        {/* Año solo para diario o mensual */}
+        {(tipoFiltro === 'diario' || tipoFiltro === 'mensual') && anios.length > 0 && (
           <select className="bg-gray-800 text-white p-2 rounded"
             value={anioSeleccionado} onChange={e => setAnioSeleccionado(Number(e.target.value))}>
             {anios.map(anio => <option key={anio} value={anio}>{anio}</option>)}
           </select>
         )}
 
-        {(tipoFiltro === 'diario' || tipoFiltro === 'mensual') && meses.length > 0 && (
+        {/* Mes solo para diario */}
+        {tipoFiltro === 'diario' && meses.length > 0 && (
           <select className="bg-gray-800 text-white p-2 rounded"
             value={mesSeleccionado} onChange={e => setMesSeleccionado(Number(e.target.value))}>
             {meses.map(mes => <option key={mes} value={mes}>{String(mes).padStart(2, '0')}</option>)}
-          </select>
-        )}
-
-        {tipoFiltro === 'diario' && dias.length > 0 && (
-          <select className="bg-gray-800 text-white p-2 rounded"
-            value={diaSeleccionado} onChange={e => setDiaSeleccionado(Number(e.target.value))}>
-            {dias.map(dia => <option key={dia} value={dia}>{String(dia).padStart(2, '0')}</option>)}
           </select>
         )}
       </div>
