@@ -8,7 +8,7 @@ import editar from '../assets/editar.png';
 const Servicios = () => {
   const navigate = useNavigate();
 
-  // 🔹 Obtener ID usuario desde token JWT
+  // 🔹 Obtener ID usuario desde token JWT (sin recursión)
   const obtenerUsuarioDesdeToken = () => {
     const token = localStorage.getItem("access_token");
     if (!token) return null;
@@ -23,16 +23,16 @@ const Servicios = () => {
   };
 
   const usuarioId = obtenerUsuarioDesdeToken();
-  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true"; // Ajusta según backend
+  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
 
   // 🔹 Validar acceso
   useEffect(() => {
     const token = localStorage.getItem("access_token");
 
     if (!token || !usuarioId) {
-      navigate("/login"); // No autenticado
+      navigate("/login");
     } else if (!esPeluqueria) {
-      navigate("/"); // No es peluquería
+      navigate("/");
     }
   }, [navigate, usuarioId, esPeluqueria]);
 

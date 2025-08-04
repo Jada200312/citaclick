@@ -24,6 +24,7 @@ const Ganancias = () => {
   const obtenerUsuarioDesdeToken = () => {
     const token = localStorage.getItem("access_token");
     if (!token) return null;
+
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       return payload.user_id || payload.user || payload.id;
@@ -38,8 +39,7 @@ const Ganancias = () => {
 
   // Validar acceso y cargar años
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (!token || !usuarioId) {
+    if (!usuarioId) {
       navigate("/login");
       return;
     }
@@ -137,7 +137,6 @@ const Ganancias = () => {
         params: { tipo_filtro: tipoFiltro, fecha: fechaFiltro },
       });
 
-      // Asegurar que los datos sean numéricos
       const sortedData = response.data
         .map(item => ({
           fecha: item.fecha,
@@ -195,7 +194,7 @@ const Ganancias = () => {
       </h2>
 
       {/* Selectores */}
-      <div className="flex justify-center gap-4 mb-6">
+      <div className="flex flex-wrap justify-center gap-4 mb-6">
         <select className="bg-gray-800 text-white p-2 rounded"
           value={tipoFiltro} onChange={e => setTipoFiltro(e.target.value)}>
           <option value="diario">Diario</option>

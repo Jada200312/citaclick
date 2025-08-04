@@ -22,28 +22,25 @@ const Suscripcion = () => {
   };
 
   const usuarioId = obtenerUsuarioDesdeToken();
-  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true"; // o ajusta según backend
+  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
 
-  // 🔹 Validar acceso
+  // 🔹 Validar acceso y cargar planes
   useEffect(() => {
     const token = localStorage.getItem("access_token");
 
     if (!token || !usuarioId) {
-      navigate("/login"); // No autenticado
+      navigate("/login");
       return;
     }
     if (!esPeluqueria) {
-      navigate("/"); // No es peluquería → fuera
+      navigate("/");
       return;
     }
 
-    // 🔹 Si pasa validación → cargar planes
     const fetchPlanes = async () => {
       try {
         const response = await axios.get('http://localhost:8000/api/peluquerias/planes/', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
         setPlanes(response.data);
       } catch (error) {

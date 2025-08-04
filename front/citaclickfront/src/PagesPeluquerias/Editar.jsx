@@ -12,23 +12,21 @@ const Editar = () => {
   const [imagen, setImagen] = useState(null);
   const [imagenActual, setImagenActual] = useState('');
 
-  // Cargar categorías dinámicamente
+  const peluqueriaId = localStorage.getItem("peluqueria_id");
+
   useEffect(() => {
     fetch('http://localhost:8000/api/servicios/categorias/')
       .then(res => {
         if (!res.ok) throw new Error('Error al cargar categorías');
         return res.json();
       })
-      .then(data => {
-        setCategorias(data);
-      })
+      .then(data => setCategorias(data))
       .catch(err => {
         console.error(err);
         alert('No se pudieron cargar las categorías');
       });
   }, []);
 
-  // Cargar datos actuales del servicio
   useEffect(() => {
     fetch(`http://localhost:8000/api/servicios/${id}/`)
       .then(res => {
@@ -38,8 +36,8 @@ const Editar = () => {
       .then(data => {
         setNombre(data.nombre);
         setPrecio(data.precio);
-        setCategoria(data.categoria); // aquí ya es el id de la categoría
-        setImagenActual(data.imagen); // ruta actual de la imagen
+        setCategoria(data.categoria);
+        setImagenActual(data.imagen);
       })
       .catch(err => {
         alert('Error al cargar el servicio');
@@ -54,7 +52,7 @@ const Editar = () => {
     formData.append('nombre', nombre);
     formData.append('precio', precio);
     formData.append('categoria', categoria);
-    formData.append('peluqueria', 4); // Cambia esto si obtienes el id dinámicamente
+    formData.append('peluqueria', peluqueriaId);
     if (imagen) formData.append('imagen', imagen);
 
     try {
@@ -74,6 +72,11 @@ const Editar = () => {
       alert('Error de red al actualizar el servicio');
       console.error(error);
     }
+  };
+
+  const obtenerURLImagen = (ruta) => {
+    if (!ruta) return null;
+    return ruta.startsWith('http') ? ruta : `http://localhost:8000${ruta}`;
   };
 
   return (
@@ -126,7 +129,7 @@ const Editar = () => {
           <label className="block mb-2">Imagen actual</label>
           {imagenActual ? (
             <img
-              src={`http://localhost:8000${imagenActual}`}
+              src={obtenerURLImagen(imagenActual)}
               alt="Imagen actual"
               className="w-40 h-40 mb-2 object-cover rounded"
             />

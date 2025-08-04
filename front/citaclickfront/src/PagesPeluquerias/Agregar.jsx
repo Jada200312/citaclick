@@ -11,7 +11,7 @@ const Agregar = () => {
   const [categorias, setCategorias] = useState([]);
   const [imagen, setImagen] = useState(null);
 
-  // 🔹 Obtener ID usuario desde token JWT
+  // 🔹 Obtener ID usuario desde token JWT (sin recursión)
   const obtenerUsuarioDesdeToken = () => {
     const token = localStorage.getItem("access_token");
     if (!token) return null;
@@ -27,16 +27,16 @@ const Agregar = () => {
 
   const usuarioId = obtenerUsuarioDesdeToken();
   const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
-  const peluqueriaId = localStorage.getItem("peluqueria_id"); // Si lo guardas al iniciar sesión
+  const peluqueriaId = localStorage.getItem("peluqueria_id");
 
   // 🔹 Validar acceso
   useEffect(() => {
     const token = localStorage.getItem("access_token");
 
     if (!token || !usuarioId) {
-      navigate("/login"); // No autenticado
+      navigate("/login");
     } else if (!esPeluqueria) {
-      navigate("/"); // No es peluquería
+      navigate("/");
     }
   }, [navigate, usuarioId, esPeluqueria]);
 
@@ -66,7 +66,7 @@ const Agregar = () => {
     formData.append("precio", precio);
     formData.append("categoria", categoria);
     formData.append("imagen", imagen);
-    formData.append("peluqueria", peluqueriaId); // 🔹 dinámico
+    formData.append("peluqueria", peluqueriaId);
 
     try {
       const response = await fetch("http://localhost:8000/api/servicios/", {

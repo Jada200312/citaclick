@@ -8,13 +8,15 @@ const Reservar = () => {
   const { fecha, hora, peluqueriaId } = location.state || {};
 
   const [servicioId, setServicioId] = useState("");
-  const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
+  const [servicios, setServicios] = useState([]);
 
   // Obtener ID del usuario desde el token JWT
   const obtenerUsuarioDesdeToken = () => {
     const token = localStorage.getItem("access_token");
-    if (!token) return null;
+    if (!token) {
+      navigate("/login");
+    }
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -27,6 +29,7 @@ const Reservar = () => {
 
   const usuarioId = obtenerUsuarioDesdeToken();
 
+  // Validar sesión
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token || !usuarioId) {
@@ -34,23 +37,40 @@ const Reservar = () => {
     }
   }, [navigate, usuarioId]);
 
+  // Obtener servicios por peluquería
+  useEffect(() => {
+    const fetchServicios = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/servicios/?peluqueria_id=${peluqueriaId}`
+        );
+        setServicios(response.data);
+      } catch (error) {
+        console.error("❌ Error al obtener servicios:", error);
+      }
+    };
+
+    if (peluqueriaId) {
+      fetchServicios();
+    }
+  }, [peluqueriaId]);
+
+  // Enviar reserva
   const manejarReserva = async () => {
     if (!servicioId) {
-      setMensaje("Por favor selecciona un servicio.");
+      alert("Por favor selecciona un servicio.");
       return;
     }
 
     if (!usuarioId) {
-      setMensaje("Usuario no autenticado.");
+      alert("Usuario no autenticado.");
       return;
     }
 
     setCargando(true);
-    setMensaje("");
 
     const token = localStorage.getItem("access_token");
 
-    // Aseguramos que sean enteros
     const datosReserva = {
       fechaReserva: fecha,
       horaReserva: hora,
@@ -74,15 +94,15 @@ const Reservar = () => {
 
       console.log("✅ Respuesta del servidor:", response.data);
 
-      setMensaje("✅ Reserva realizada con éxito");
-      setTimeout(() => navigate("/"), 2000);
+      alert("✅ Reserva realizada con éxito");
+      setTimeout(() => navigate("/"), 1000);
     } catch (error) {
       console.error("❌ Error en la reserva:", error.response?.data || error);
       const mensajeError =
         error.response?.data?.detail ||
         error.response?.data?.message ||
         "❌ Error al reservar.";
-      setMensaje(mensajeError);
+      alert(mensajeError);
     } finally {
       setCargando(false);
     }
@@ -107,8 +127,11 @@ const Reservar = () => {
             className="text-black p-2 rounded w-full block mb-2 border"
           >
             <option value="">Selecciona</option>
-            <option value={1}>Corte de Cabello</option>
-            <option value={2}>Corte de Barba</option>
+            {servicios.map((servicio) => (
+              <option key={servicio.id} value={servicio.id}>
+                {servicio.nombre}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -119,8 +142,6 @@ const Reservar = () => {
         >
           {cargando ? "Reservando..." : "Confirmar Reserva"}
         </button>
-
-        {mensaje && <p className="mt-4">{mensaje}</p>}
       </div>
     </div>
   );

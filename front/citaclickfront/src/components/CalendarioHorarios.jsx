@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { format, isBefore, startOfToday, parse } from "date-fns";
+import { format, isBefore, startOfToday, parse, addMonths } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -83,12 +83,14 @@ const CalendarioHorarios = ({ peluqueriaId }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-zinc-950 shadow-xl rounded-xl mt-6"> <br />
+    <div className="max-w-2xl mx-auto p-6 bg-zinc-950 shadow-xl rounded-xl mt-6">
+      <br />
       <div className="flex justify-center mb-6">
         <DatePicker
           selected={fecha}
           onChange={manejarCambioFecha}
           minDate={startOfToday()}
+          maxDate={addMonths(startOfToday(), 1)} // Limita a 1 mes desde hoy
           dateFormat="dd/MM/yyyy"
           locale="es"
           className="border border-zinc-950 rounded px-4 py-2 text-center w-full sm:w-auto placeholder:text-zinc-950"
@@ -98,7 +100,10 @@ const CalendarioHorarios = ({ peluqueriaId }) => {
 
       {fecha && (
         <h3 className="text-lg font-semibold text-center mb-4 text-white">
-          Horarios disponibles para el <span className="text-orange-600 ">{format(fecha, "dd/MM/yyyy")}</span>
+          Horarios disponibles para el{" "}
+          <span className="text-orange-600">
+            {format(fecha, "dd/MM/yyyy")}
+          </span>
         </h3>
       )}
 
@@ -123,8 +128,7 @@ const CalendarioHorarios = ({ peluqueriaId }) => {
             const estaDisponible = hora.disponible && !esPasada;
 
             return (
-           
-              <div 
+              <div
                 key={hora.hora}
                 onClick={() =>
                   estaDisponible ? manejarClick(hora.hora) : null

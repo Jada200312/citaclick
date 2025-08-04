@@ -7,7 +7,6 @@ const EditarOEliminar = () => {
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
   const navigate = useNavigate();
 
-  // 🔹 Obtener ID usuario desde token JWT
   const obtenerUsuarioDesdeToken = () => {
     const token = localStorage.getItem("access_token");
     if (!token) return null;
@@ -21,41 +20,44 @@ const EditarOEliminar = () => {
     }
   };
 
-  const usuarioId = obtenerUsuarioDesdeToken();
-  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true"; 
+  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
+  const peluqueriaId = localStorage.getItem("peluqueria_id");
 
-  // 🔹 Validar acceso
+  // Validar acceso
   useEffect(() => {
     const token = localStorage.getItem("access_token");
+    const usuarioId = obtenerUsuarioDesdeToken();
 
     if (!token || !usuarioId) {
-      navigate("/login"); // No autenticado
+      navigate("/login");
     } else if (!esPeluqueria) {
-      navigate("/"); // No es peluquería → fuera
+      navigate("/");
     }
-  }, [navigate, usuarioId, esPeluqueria]);
+  }, [navigate, esPeluqueria]);
 
   // Cargar servicios
   useEffect(() => {
-    fetch('http://localhost:8000/api/servicios/')
+    if (!peluqueriaId) {
+      console.error("No se encontró peluqueria_id en localStorage");
+      return;
+    }
+
+    fetch(`http://localhost:8000/api/servicios/?peluqueria_id=${peluqueriaId}`)
       .then(res => res.json())
       .then(data => setServicios(data))
       .catch(error => console.error('Error al cargar servicios:', error));
-  }, []);
+  }, [peluqueriaId]);
 
   // Cargar categorías
   useEffect(() => {
-    fetch('http://localhost:8000/api/categorias/')
+    fetch('http://localhost:8000/api/servicios/categorias/')
       .then(res => res.json())
       .then(data => setCategorias(data))
       .catch(error => console.error('Error al cargar categorías:', error));
   }, []);
 
-  // Filtra servicios por categoría
   const filtrarServicios = () => {
-    if (!categoriaSeleccionada) {
-      return servicios;
-    }
+    if (!categoriaSeleccionada) return servicios;
     return servicios.filter(s => s.categoria === categoriaSeleccionada);
   };
 
@@ -63,15 +65,25 @@ const EditarOEliminar = () => {
     const confirmDelete = window.confirm('¿Seguro que quieres eliminar este servicio?');
     if (!confirmDelete) return;
 
-    const res = await fetch(`http://localhost:8000/api/servicios/${id}/`, {
-      method: 'DELETE',
-    });
+    try {
+      const res = await fetch(`http://localhost:8000/api/servicios/${id}/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
 
-    if (res.ok) {
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(`Error al eliminar: ${errorData.detail || 'Error desconocido'}`);
+        return;
+      }
+
       setServicios(servicios.filter(s => s.id !== id));
       alert('Servicio eliminado');
-    } else {
-      alert('Error al eliminar');
+    } catch (error) {
+      console.error('Error al eliminar servicio:', error);
+      alert('Error al eliminar el servicio');
     }
   };
 
@@ -83,7 +95,6 @@ const EditarOEliminar = () => {
 
       {/* Filtros de categoría */}
       <div className="flex justify-center gap-4 mb-10 flex-wrap">
-        {/* Botón Todos */}
         <button
           onClick={() => setCategoriaSeleccionada(null)}
           className={`px-4 py-2 rounded-full border ${
@@ -95,31 +106,6 @@ const EditarOEliminar = () => {
           Todos
         </button>
 
-        {/* Botón Corte de Cabello */}
-        <button
-          onClick={() => setCategoriaSeleccionada(1)}
-          className={`px-4 py-2 rounded-full border ${
-            categoriaSeleccionada === 1
-              ? 'bg-orange-500 text-white'
-              : 'bg-white text-black'
-          }`}
-        >
-          Corte de Cabello
-        </button>
-
-        {/* Botón Barba */}
-        <button
-          onClick={() => setCategoriaSeleccionada(2)}
-          className={`px-4 py-2 rounded-full border ${
-            categoriaSeleccionada === 2
-              ? 'bg-orange-500 text-white'
-              : 'bg-white text-black'
-          }`}
-        >
-          Barba
-        </button>
-
-        {/* Botones para otras categorías */}
         {categorias.map(cat => (
           <button
             key={cat.id}
@@ -149,7 +135,7 @@ const EditarOEliminar = () => {
                 className="w-full h-48 object-cover"
               />
             ) : (
-              <div className="w-full h-48 bg-white flex items-center justify-center text-white">
+              <div className="w-full h-48 bg-gray-300 flex items-center justify-center text-black">
                 Sin imagen
               </div>
             )}

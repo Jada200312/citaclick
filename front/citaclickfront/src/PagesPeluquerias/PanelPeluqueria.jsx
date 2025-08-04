@@ -13,7 +13,9 @@ const MenuPrincipal = ({ peluqueriaId }) => {
   // 🔹 Obtener ID usuario desde token JWT
   const obtenerUsuarioDesdeToken = () => {
     const token = localStorage.getItem("access_token");
-    if (!token) return null;
+    if (!token) {
+      navigate("/login");
+    }
 
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
@@ -30,7 +32,6 @@ const MenuPrincipal = ({ peluqueriaId }) => {
   // 🔹 Validar acceso
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-
     if (!token || !usuarioId) {
       navigate("/login"); // No autenticado
     } else if (!esPeluqueria) {
