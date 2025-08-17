@@ -16,9 +16,10 @@ export const AuthProvider = ({ children }) => {
     return savedTime ? parseInt(savedTime, 10) : 300;
   });
 
-  const countdownIntervalRef = useRef(null);
+  const countdownTimeoutRef = useRef(null);
   const lastActivityRef = useRef(Date.now());
   const logoutPendingRef = useRef(false);
+  const refreshingRef = useRef(false);
 
   const api = axios.create({
     baseURL: "http://localhost:8000",
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("access_token", userData.access);
     localStorage.setItem("refresh_token", userData.refresh);
     localStorage.setItem("time_left", "300");
+    localStorage.setItem("session_expires_at", (Date.now() + 300000).toString());
     setTimeLeft(300);
     navigate("/");
   };
@@ -39,11 +41,15 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("time_left");
-    clearInterval(countdownIntervalRef.current);
+    localStorage.removeItem("session_expires_at");
+    clearTimeout(countdownTimeoutRef.current);
     navigate("/login");
   };
 
   const refreshAccessToken = async () => {
+    if (refreshingRef.current) return null;
+    refreshingRef.current = true;
+
     try {
       const refresh = localStorage.getItem("refresh_token");
       if (!refresh) {
@@ -55,6 +61,9 @@ export const AuthProvider = ({ children }) => {
 
       if (data.access) {
         localStorage.setItem("access_token", data.access);
+        const newExpiresAt = Date.now() + 300000; // 5 min
+        localStorage.setItem("session_expires_at", newExpiresAt.toString());
+        localStorage.setItem("time_left", "300");
         setAuth((prev) => ({
           ...prev,
           user: { ...prev.user, access: data.access },
@@ -67,40 +76,42 @@ export const AuthProvider = ({ children }) => {
     } catch {
       logoutPendingRef.current = true;
       return null;
+    } finally {
+      refreshingRef.current = false;
     }
   };
 
-  const startCountdown = (initialSeconds) => {
-    clearInterval(countdownIntervalRef.current);
-    setTimeLeft(initialSeconds);
+  const startCountdown = () => {
+    clearTimeout(countdownTimeoutRef.current);
 
-    countdownIntervalRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        const newTime = prev - 1;
-        localStorage.setItem("time_left", newTime);
+    const tick = () => {
+      const expiresAt = parseInt(localStorage.getItem("session_expires_at"), 10) || (Date.now() + 300000);
+      const now = Date.now();
+      const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
 
-        if (newTime <= 0) {
-          clearInterval(countdownIntervalRef.current);
-          logoutPendingRef.current = true;
-          return 0;
-        }
+      setTimeLeft(remaining);
+      localStorage.setItem("time_left", remaining);
 
-        if (newTime === 10) {
-          const activityInLastFiveMinutes =
-            Date.now() - lastActivityRef.current < 5 * 60 * 1000;
+      if (remaining <= 0) {
+        logoutPendingRef.current = true;
+        return;
+      }
 
-          if (activityInLastFiveMinutes) {
-            refreshAccessToken().then((ok) => {
-              if (ok) {
-                startCountdown(300);
-              }
-            });
+      const activityInLastFiveMinutes = now - lastActivityRef.current < 5 * 60 * 1000;
+
+      if (remaining <= 10 && activityInLastFiveMinutes) {
+        refreshAccessToken().then((ok) => {
+          if (ok) {
+            startCountdown(); // reiniciar nuevo ciclo
           }
-        }
+        });
+        return; // detener tick hasta nuevo ciclo
+      }
 
-        return newTime;
-      });
-    }, 1000);
+      countdownTimeoutRef.current = setTimeout(tick, 500);
+    };
+
+    tick();
   };
 
   useEffect(() => {
@@ -137,8 +148,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (auth.isAuthenticated) {
-      const savedTime = parseInt(localStorage.getItem("time_left"), 10) || 300;
-      startCountdown(savedTime);
+      startCountdown();
     }
   }, [auth.isAuthenticated]);
 
@@ -151,7 +161,6 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  // Formatear tiempo en mm:ss
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;

@@ -1,9 +1,32 @@
-import React from 'react';
-import fondoBienvenida from '../assets/indeximg.jpeg'; 
-import contentcc from '../assets/contentcc.png'; 
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import fondoBienvenida from '../assets/indeximg.jpeg';
+import contentcc from '../assets/contentcc.png';
 
+const Inicio = () => {
+  const navigate = useNavigate();
 
-const inicio = () => {
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const now = Date.now() / 1000;
+
+        if (payload.exp < now) {
+          // Token expirado
+          localStorage.removeItem("access_token");
+          navigate("/login");
+        }
+      } catch (error) {
+        // Token inválido o malformado
+        localStorage.removeItem("access_token");
+        navigate("/login");
+      }
+    }
+  }, [navigate]);
+
   return (
     <>
       <div
@@ -21,9 +44,7 @@ const inicio = () => {
         </div>
       </div>
 
-    
       <div className="bg-black text-white px-6 py-10 md:px-20 md:py-16 mt-6 flex flex-col md:flex-row items-center justify-between rounded-lg">
-        
         <div className="flex-1 mb-8 md:mb-0 md:mr-10">
           <h2 className="text-3xl font-semibold mb-4">
             ¿Quienes <span className="text-orange-500">Somos</span>?
@@ -34,12 +55,14 @@ const inicio = () => {
             correcta para captar la atención del público.
           </p>
           <p className="mb-6 text-sm md:text-base">Añade una llamada a la acción</p>
-          <button className="border border-white text-white py-2 px-6 rounded hover:bg-orange-600 hover:text-white transition">
+          <button
+            className="border border-white text-white py-2 px-6 rounded hover:bg-orange-600 hover:text-white transition"
+            onClick={() => navigate("/login")}
+          >
             Iniciar Sesión
           </button>
         </div>
 
-        
         <div className="flex-1 flex justify-center">
           <img
             src={contentcc}
@@ -52,5 +75,4 @@ const inicio = () => {
   );
 };
 
-export default inicio;
-
+export default Inicio;
