@@ -4,7 +4,7 @@ import Footer from './components/Footer';
 import { AuthProvider } from './context/AuthContext.jsx';
 
 import Inicio from './pages/Inicio';
-import Login from './pages/Login.jsx';
+import Login from './pages/login.jsx';
 import RegistrarUser from './pages/RegistrarUser';
 import RegistroPeluqueria from './pages/RegistroPeluqueria';
 import ListadoPeluquerias from './pages/listado_peluquerias';

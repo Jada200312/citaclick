@@ -26,7 +26,7 @@ const Reservas = () => {
   };
 
   const usuarioId = obtenerUsuarioDesdeToken();
-  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
+  const rolId = localStorage.getItem("rol_id");
   const peluqueriaId = localStorage.getItem("peluqueria_id"); // 🔹 ID de la peluquería logueada
 
   // 🔹 Validar acceso
@@ -35,10 +35,10 @@ const Reservas = () => {
 
     if (!token || !usuarioId) {
       navigate("/login");
-    } else if (!esPeluqueria) {
+    } else if (rolId !=="2") {
       navigate("/");
     }
-  }, [navigate, usuarioId, esPeluqueria]);
+  }, [navigate, usuarioId, rolId]);
 
   const [diaActivo, setDiaActivo] = useState(0);
   const [horarios, setHorarios] = useState([]);

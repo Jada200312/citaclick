@@ -13,14 +13,20 @@ const Editar = () => {
   const [imagenActual, setImagenActual] = useState('');
 
   const token = localStorage.getItem('access_token');
-  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
+  const rolId = localStorage.getItem("rol_id");
   const peluqueriaId = localStorage.getItem("peluqueria_id");
 
   useEffect(() => {
-    if (!token || !esPeluqueria) {
+    const token = localStorage.getItem("access_token");
+
+    if (!token || !usuarioId) {
       navigate("/login");
+    } else if (rolId !== "2") {
+      navigate("/");
     }
-  }, [token, esPeluqueria, navigate]);
+  }, [navigate, usuarioId, rolId]);
+
+
 
   useEffect(() => {
     fetch('http://localhost:8000/api/servicios/categorias/', {

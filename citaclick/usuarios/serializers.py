@@ -1,45 +1,14 @@
-"""from rest_framework import serializers
-from .models import Usuario
-from peluquerias.models import Peluqueria
-
-class UsuarioSerializer(serializers.ModelSerializer):
-    peluqueria_id = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Usuario
-        fields = [
-            'id',
-            'username',
-            'password',
-            'email',
-            'first_name',
-            'last_name',
-            'es_peluqueria',
-            'celular',
-            'cedula',
-            'imagen',
-            'peluqueria_id',  # 👈 Agregado
-        ]
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def get_peluqueria_id(self, obj):
-        try:
-            return Peluqueria.objects.get(usuario=obj).id
-        except Peluqueria.DoesNotExist:
-            return None
-
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = Usuario(**validated_data)
-        user.set_password(password) 
-        user.save()
-        return user"""
-
 from rest_framework import serializers
-from .models import Usuario
+from .models import Usuario, Rol
 from peluquerias.models import Peluqueria
 
 class UsuarioSerializer(serializers.ModelSerializer):
+    # Nombre del rol como string
+    rol = serializers.CharField(source='rol.nombre', read_only=True)
+    # ID del rol para leer y escribir
+    rol_id = serializers.SerializerMethodField()
+    
+    # ID de la peluquería relacionada (si existe)
     peluqueria_id = serializers.SerializerMethodField()
 
     class Meta:
@@ -51,28 +20,36 @@ class UsuarioSerializer(serializers.ModelSerializer):
             'email',
             'first_name',
             'last_name',
-            'es_peluqueria',
+            'rol',        # nombre del rol
+            'rol_id',     # id del rol
             'celular',
             'cedula',
             'imagen',
-            'peluqueria_id',  # 👈 Agregado
+            'peluqueria_id'
         ]
         extra_kwargs = {'password': {'write_only': True}}
 
+    # Método para devolver peluqueria_id
     def get_peluqueria_id(self, obj):
         try:
             return Peluqueria.objects.get(usuario=obj).id
         except Peluqueria.DoesNotExist:
             return None
-        
+
+    # Método para devolver rol_id
+    def get_rol_id(self, obj):
+        return obj.rol.id if obj.rol else None
+
+    # Crear usuario con contraseña hasheada
     def create(self, validated_data):
-            password = validated_data.pop('password')
-            user = Usuario(**validated_data)
+        password = validated_data.pop('password', None)
+        user = Usuario(**validated_data)
+        if password:
             user.set_password(password)
-            user.save()
-            return user
+        user.save()
+        return user
 
-
+    # Actualizar usuario y contraseña si se provee
     def update(self, instance, validated_data):
         password = validated_data.get('password', None)
         current_password = validated_data.get('current_password', None)

@@ -13,7 +13,7 @@ function CrearUser() {
   const [lastname, setlastname] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
-  const [esPeluqueria, setEsPeluqueria] = useState(false);
+  const [rolId, setRolId] = useState(1);
   const [celular, setCelular] = useState('');
   const [imagen, setImagen] = useState(null);
   const [cedula, setCedula] = useState('');
@@ -36,7 +36,7 @@ function CrearUser() {
     formData.append('last_name', lastname);
     formData.append('password', password);
     formData.append('email', email);
-    formData.append('es_peluqueria', esPeluqueria ? 'true' : 'false');
+    formData.append('rol_id', rolId);
     formData.append('celular', celular);
     formData.append('imagen', imagen);
     formData.append('cedula', cedula);
@@ -76,7 +76,7 @@ function CrearUser() {
       }
 
       const loginData = await loginRes.json();
-      localStorage.setItem('token', loginData.access); // Guardas el token
+      localStorage.setItem('token', loginData.access);
       localStorage.setItem('refresh', loginData.refresh);
       login(loginData.access);
       setAlerta({
@@ -94,7 +94,7 @@ manejarRedireccion();
   };
 
   const manejarRedireccion = () => {
-    if (esPeluqueria) {
+    if (rolId === 2) {
       navigate('/peluqueria');
     } else {
       navigate('/');
@@ -170,10 +170,20 @@ manejarRedireccion();
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
         </div>
 
-        <div className="flex items-center gap-2">
-          <input type="checkbox" checked={esPeluqueria} onChange={(e) => setEsPeluqueria(e.target.checked)} className="w-5 h-5 text-orange-400 accent-orange-500 rounded" />
-          <label className="text-sm text-white">¿Es peluquería?</label>
-        </div>
+        <div>
+            <label className="block text-sm font-medium text-white">
+              Tipo de cuenta:
+            </label>
+
+            <select
+              value={rolId}
+              onChange={(e) => setRolId(Number(e.target.value))}
+              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm bg-white"
+            >
+              <option value={1}>Cliente</option>
+              <option value={2}>Propietario</option>
+            </select>
+      </div>
 
         <div>
           <label className="block text-sm font-medium text-white">Celular:</label>

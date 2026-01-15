@@ -22,7 +22,7 @@ const Suscripcion = () => {
   };
 
   const usuarioId = obtenerUsuarioDesdeToken();
-  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
+  const rolId = localStorage.getItem("rol_id");
 
   // 🔹 Validar acceso y cargar planes
   useEffect(() => {
@@ -32,7 +32,7 @@ const Suscripcion = () => {
       navigate("/login");
       return;
     }
-    if (!esPeluqueria) {
+    if (rolId !=="2") {
       navigate("/");
       return;
     }
@@ -49,7 +49,7 @@ const Suscripcion = () => {
     };
 
     fetchPlanes();
-  }, [navigate, usuarioId, esPeluqueria]);
+  }, [navigate, usuarioId, rolId]);
 
   const handleSeleccionar = (planId) => {
     navigate(`/activar/${planId}`);

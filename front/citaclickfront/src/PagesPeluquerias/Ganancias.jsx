@@ -35,19 +35,19 @@ const Ganancias = () => {
   };
 
   const usuarioId = obtenerUsuarioDesdeToken();
-  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
+  const rolId = localStorage.getItem("rol_id");
 
   useEffect(() => {
     if (!usuarioId) {
       navigate("/login");
       return;
     }
-    if (!esPeluqueria) {
+    if (rolId !=="2") {
       navigate("/");
       return;
     }
     cargarAnios();
-  }, [navigate, usuarioId, esPeluqueria]);
+  }, [navigate, usuarioId, rolId]);
 
   const cargarAnios = async () => {
     try {

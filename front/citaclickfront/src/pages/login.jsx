@@ -36,7 +36,8 @@ function Login() {
 
       // 3️⃣ Guardar datos extras en localStorage (opcionales)
       localStorage.setItem("user_id", user.id);
-      localStorage.setItem("es_peluqueria", user.es_peluqueria);
+      localStorage.setItem("rol", user.rol);
+      localStorage.setItem("rol_id", user.rol_id);
       if (user.peluqueria_id) {
         localStorage.setItem("peluqueria_id", user.peluqueria_id);
       }

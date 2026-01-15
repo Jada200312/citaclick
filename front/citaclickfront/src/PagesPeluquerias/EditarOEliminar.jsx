@@ -20,20 +20,19 @@ const EditarOEliminar = () => {
     }
   };
 
-  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
+  const rolId = localStorage.getItem("rol_id");
   const peluqueriaId = localStorage.getItem("peluqueria_id");
 
   // Validar acceso
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    const usuarioId = obtenerUsuarioDesdeToken();
 
     if (!token || !usuarioId) {
       navigate("/login");
-    } else if (!esPeluqueria) {
+    } else if (rolId !== "2") {
       navigate("/");
     }
-  }, [navigate, esPeluqueria]);
+  }, [navigate, usuarioId, rolId]);
 
   // Cargar servicios
   useEffect(() => {

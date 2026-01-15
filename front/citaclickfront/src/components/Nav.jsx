@@ -10,7 +10,9 @@ function Navbar() {
 
   const { logout } = useContext(AuthContext); // Usar logout global
   const isAuthenticated = !!localStorage.getItem('access_token');
-  const esPeluqueria = localStorage.getItem('es_peluqueria') === 'true';
+  const rol = localStorage.getItem('rol');
+  const esPeluqueria = rol === 'propietario';
+
 
   const [menuAbierto, setMenuAbierto] = useState(false);
   const menuRef = useRef(null);

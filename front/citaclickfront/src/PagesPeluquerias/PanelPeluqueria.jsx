@@ -27,17 +27,17 @@ const MenuPrincipal = ({ peluqueriaId }) => {
   };
 
   const usuarioId = obtenerUsuarioDesdeToken();
-  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true"; // o ajusta según tu backend
+  const rolId = localStorage.getItem("rol_id");
 
   // 🔹 Validar acceso
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token || !usuarioId) {
-      navigate("/login"); // No autenticado
-    } else if (!esPeluqueria) {
-      navigate("/"); // No es peluquería → fuera
+      navigate("/login");
+    } else if (rolId !== "2") {
+      navigate("/"); 
     }
-  }, [navigate, usuarioId, esPeluqueria]);
+  }, [navigate, usuarioId, rolId]);
 
   const opciones = [
     { nombre: "Ganancias", imagen: ganancias, ruta: "/ganancias" },

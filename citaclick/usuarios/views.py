@@ -56,7 +56,7 @@ class VerificarTipoUsuarioView(APIView):
         except Usuario.DoesNotExist:
             return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
-        if usuario.es_peluqueria:
-            return Response({"tipo": "peluqueria"}, status=status.HTTP_200_OK)
+        if usuario.rol.nombre == "propietario": 
+            return Response({"tipo": "propietario"})
         else:
-            return Response({"tipo": "cliente"}, status=status.HTTP_200_OK)
+            return Response({"tipo": "cliente"})

@@ -23,7 +23,7 @@ const Servicios = () => {
   };
 
   const usuarioId = obtenerUsuarioDesdeToken();
-  const esPeluqueria = localStorage.getItem("es_peluqueria") === "true";
+  const rolId = localStorage.getItem("rol_id");
 
   // 🔹 Validar acceso
   useEffect(() => {
@@ -31,10 +31,10 @@ const Servicios = () => {
 
     if (!token || !usuarioId) {
       navigate("/login");
-    } else if (!esPeluqueria) {
+    } else if (rolId!=="2") {
       navigate("/");
     }
-  }, [navigate, usuarioId, esPeluqueria]);
+  }, [navigate, usuarioId, rolId]);
 
   return (
     <div className="bg-black min-h-screen text-white p-6">
