@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Logo from '../assets/log.png';
+import { Navigate } from 'react-router-dom';
 
 function Registrarpeluqueria() {
   document.title = "Registrar Peluqueria";
@@ -70,10 +71,13 @@ function Registrarpeluqueria() {
     formData.append('fecha_vencimiento', fechaVencimientoFormateada);
     formData.append('horario', horario_Id); // 🔗
 
+    const token = localStorage.getItem('token');
+    console.log("TOKEN ENVIADO:", token);
+
    const resPeluqueria = await fetch('http://localhost:8000/api/peluquerias/', {
   method: 'POST',
   headers: {
-    Authorization: `Bearer ${localStorage.getItem('access_token')}`
+    Authorization: `Bearer ${localStorage.getItem('token')}`
   },
   body: formData
 });
@@ -97,6 +101,7 @@ function Registrarpeluqueria() {
       tipo: 'exito',
       mensaje: 'Peluquería registrada correctamente.'
     });
+    navigate('/peluqueria');
 
     // Limpiar campos
     setNombre('');

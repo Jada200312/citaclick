@@ -20,6 +20,7 @@ class PeluqueriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Peluqueria
         fields = '__all__'
+        read_only_fields = ['usuario', 'fecha_registro', 'plan', 'estado']
 
 
     def get_promedio_calificaciones(self, obj):
