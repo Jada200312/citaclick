@@ -1,103 +1,125 @@
-import { useState } from 'react';
-import Logo from '../assets/log.png';
-import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext.jsx';
+import { useState } from "react";
+import Logo from "../assets/log.png";
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext.jsx";
+import { useEffect } from "react";
 function CrearUser() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   document.title = "Registrarse";
-  const [username, setUsername] = useState('');
-  const [name, setname] = useState('');
-  const [lastname, setlastname] = useState('');
-  const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState("");
+  const [name, setname] = useState("");
+  const [lastname, setlastname] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [rolId, setRolId] = useState(1);
-  const [celular, setCelular] = useState('');
+  const [celular, setCelular] = useState("");
   const [imagen, setImagen] = useState(null);
-  const [cedula, setCedula] = useState('');
+  const [cedula, setCedula] = useState("");
+  const [tiposNegocio, setTiposNegocio] = useState([]);
+  const [tipoNegocioId, setTipoNegocioId] = useState("");
+
   const [alerta, setAlerta] = useState(null);
+
+  useEffect(() => {
+    if (rolId === 2) {
+      fetch("http://localhost:8000/api/negocios/tipos-negocio/")
+        .then((res) => res.json())
+        .then((data) => setTiposNegocio(data))
+        .catch((err) => console.error("Error cargando tipos de negocio:", err));
+    } else {
+      setTiposNegocio([]);
+      setTipoNegocioId("");
+    }
+  }, [rolId]);
 
   const manejarEnvio = async (e) => {
     e.preventDefault();
 
     if (!username || !password || !email || !celular || !imagen || !cedula) {
       setAlerta({
-        tipo: 'error',
-        mensaje: 'Todos los campos son obligatorios.'
+        tipo: "error",
+        mensaje: "Todos los campos son obligatorios.",
       });
       return;
     }
 
     const formData = new FormData();
-    formData.append('username', username);
-    formData.append('first_name', name);
-    formData.append('last_name', lastname);
-    formData.append('password', password);
-    formData.append('email', email);
-    formData.append('rol_id', rolId);
-    formData.append('celular', celular);
-    formData.append('imagen', imagen);
-    formData.append('cedula', cedula);
+    formData.append("username", username);
+    formData.append("first_name", name);
+    formData.append("last_name", lastname);
+    formData.append("password", password);
+    formData.append("email", email);
+    formData.append("rol_id", rolId);
+    formData.append("celular", celular);
+    formData.append("imagen", imagen);
+    formData.append("cedula", cedula);
+    if (rolId === 2 && !tipoNegocioId) {
+      setAlerta({ tipo: "error", mensaje: "Seleccione un tipo de negocio" });
+      return;
+    }
 
     try {
-      const res = await fetch('http://localhost:8000/api/usuarios/registrar/', {
-        method: 'POST',
-        body: formData
+      const res = await fetch("http://localhost:8000/api/usuarios/registrar/", {
+        method: "POST",
+        body: formData,
       });
 
       if (!res.ok) {
         const errorData = await res.json();
         const mensaje =
           errorData.detail ||
-          Object.values(errorData).flat().join('\n') ||
-          'Error desconocido';
+          Object.values(errorData).flat().join("\n") ||
+          "Error desconocido";
         setAlerta({
-          tipo: 'error',
-          mensaje: `Error del servidor:\n${mensaje}`
+          tipo: "error",
+          mensaje: `Error del servidor:\n${mensaje}`,
         });
         return;
       }
 
       // Login automático
-      const loginRes = await fetch('http://localhost:8000/api/token/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+      const loginRes = await fetch("http://localhost:8000/api/token/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
       });
 
       if (!loginRes.ok) {
         setAlerta({
-          tipo: 'error',
-          mensaje: 'El usuario se registró pero hubo un problema al iniciar sesión automáticamente.'
+          tipo: "error",
+          mensaje:
+            "El usuario se registró pero hubo un problema al iniciar sesión automáticamente.",
         });
         return;
       }
 
       const loginData = await loginRes.json();
-      localStorage.setItem('token', loginData.access);
-      localStorage.setItem('refresh', loginData.refresh);
+      localStorage.setItem("token", loginData.access);
+      localStorage.setItem("refresh", loginData.refresh);
       login(loginData.access);
       setAlerta({
-        tipo: 'exito',
-        mensaje: 'Usuario registrado y autenticado correctamente'
+        tipo: "exito",
+        mensaje: "Usuario registrado y autenticado correctamente",
       });
-manejarRedireccion();
+      manejarRedireccion();
     } catch (err) {
-      console.error('Error inesperado:', err);
+      console.error("Error inesperado:", err);
       setAlerta({
-        tipo: 'error',
-        mensaje: 'Error inesperado al registrar usuario.'
+        tipo: "error",
+        mensaje: "Error inesperado al registrar usuario.",
       });
     }
   };
 
   const manejarRedireccion = () => {
     if (rolId === 2) {
-      navigate('/peluqueria');
+      localStorage.setItem("tipoNegocioId", tipoNegocioId);
+      navigate("/peluqueria");
     } else {
-      navigate('/');
+      navigate("/");
     }
   };
 
@@ -105,13 +127,15 @@ manejarRedireccion();
     <div className="bg-black min-h-screen flex justify-center items-center px-6 py-4 mt-6 mb-2">
       {alerta && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className={`p-6 rounded-lg shadow-lg max-w-md w-full mx-4 bg-black border border-orange-600 text-orange-600`}>
+          <div
+            className={`p-6 rounded-lg shadow-lg max-w-md w-full mx-4 bg-black border border-orange-600 text-orange-600`}
+          >
             <h2 className="text-xl font-semibold mb-2">
-              {alerta.tipo === 'exito' ? 'Registro exitoso' : 'Error'}
+              {alerta.tipo === "exito" ? "Registro exitoso" : "Error"}
             </h2>
             <pre className="mb-4 whitespace-pre-wrap">{alerta.mensaje}</pre>
             <div className="text-right">
-              {alerta.tipo === 'exito' ? (
+              {alerta.tipo === "exito" ? (
                 <button
                   onClick={manejarRedireccion}
                   className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-400"
@@ -136,71 +160,163 @@ manejarRedireccion();
         encType="multipart/form-data"
         className="md:w-[60%] space-y-3 w-full max-w-md bg-zinc-950 p-4 rounded shadow"
       >
-        <h1 className="text-xl font-bold text-white">Bienve<span className="text-orange-500">nido</span></h1>
-        <p className="text-base text-white leading-relaxed">Complete Los Siguientes Campos:</p>
+        <h1 className="text-xl font-bold text-white">
+          Bienve<span className="text-orange-500">nido</span>
+        </h1>
+        <p className="text-base text-white leading-relaxed">
+          Complete Los Siguientes Campos:
+        </p>
 
         <div className="flex justify-end">
-                    <button className="text-orange-600 hover:bg-orange-500 hover:text-white font-medium py-2 px-4 rounded transition-colors duration-200">Iniciar Sesión</button>
-
+          <button className="text-orange-600 hover:bg-orange-500 hover:text-white font-medium py-2 px-4 rounded transition-colors duration-200">
+            Iniciar Sesión
+          </button>
         </div>
 
         {/* Campos de registro */}
         <div>
-          <label className="block text-sm font-medium text-white">Nombre de usuario:</label>
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
+          <label className="block text-sm font-medium text-white">
+            Nombre de usuario:
+          </label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">Nombre:</label>
-          <input type="text" value={name} onChange={(e) => setname(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
+          <label className="block text-sm font-medium text-white">
+            Nombre:
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setname(e.target.value)}
+            required
+            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">Apellido:</label>
-          <input type="text" value={lastname} onChange={(e) => setlastname(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
+          <label className="block text-sm font-medium text-white">
+            Apellido:
+          </label>
+          <input
+            type="text"
+            value={lastname}
+            onChange={(e) => setlastname(e.target.value)}
+            required
+            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">Contraseña:</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
+          <label className="block text-sm font-medium text-white">
+            Contraseña:
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-white">Email:</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
+          />
         </div>
 
         <div>
+          <label className="block text-sm font-medium text-white">
+            Tipo de cuenta:
+          </label>
+
+          <select
+            value={rolId}
+            onChange={(e) => setRolId(Number(e.target.value))}
+            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm bg-white"
+          >
+            <option value={1}>Cliente</option>
+            <option value={2}>Propietario</option>
+          </select>
+        </div>
+
+        {rolId === 2 && (
+          <div>
             <label className="block text-sm font-medium text-white">
-              Tipo de cuenta:
+              Tipo de negocio:
             </label>
 
             <select
-              value={rolId}
-              onChange={(e) => setRolId(Number(e.target.value))}
+              value={tipoNegocioId}
+              onChange={(e) => setTipoNegocioId(e.target.value)}
+              required
               className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm bg-white"
             >
-              <option value={1}>Cliente</option>
-              <option value={2}>Propietario</option>
+              <option value="">Seleccione un tipo</option>
+              {tiposNegocio.map((tipo) => (
+                <option key={tipo.id} value={tipo.id}>
+                  {tipo.nombre}
+                </option>
+              ))}
             </select>
-      </div>
+          </div>
+        )}
 
         <div>
-          <label className="block text-sm font-medium text-white">Celular:</label>
-          <input type="text" value={celular} onChange={(e) => setCelular(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
+          <label className="block text-sm font-medium text-white">
+            Celular:
+          </label>
+          <input
+            type="text"
+            value={celular}
+            onChange={(e) => setCelular(e.target.value)}
+            required
+            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">Foto de perfil:</label>
-          <input type="file" accept="image/*" onChange={(e) => setImagen(e.target.files[0])} required className="mt-1 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600 cursor-pointer" />
+          <label className="block text-sm font-medium text-white">
+            Foto de perfil:
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImagen(e.target.files[0])}
+            required
+            className="mt-1 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600 cursor-pointer"
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white">Cédula:</label>
-          <input type="text" value={cedula} onChange={(e) => setCedula(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm" />
+          <label className="block text-sm font-medium text-white">
+            Cédula:
+          </label>
+          <input
+            type="text"
+            value={cedula}
+            onChange={(e) => setCedula(e.target.value)}
+            required
+            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
+          />
         </div>
 
-        <button type="submit" className="w-full bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-400 transition">
+        <button
+          type="submit"
+          className="w-full bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-400 transition"
+        >
           Registrar
         </button>
       </form>

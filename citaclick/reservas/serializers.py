@@ -1,27 +1,50 @@
 from rest_framework import serializers
-from .models import Reserva, Peluqueria, Servicio
+from .models import Reserva
+from negocios.models import Negocio, Recurso
+from servicios.models import Servicio
 
-class PeluqueriaSerializer(serializers.ModelSerializer):
+
+class NegocioSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Peluqueria
+        model = Negocio
         fields = ['id', 'nombre']
+
+
+class RecursoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recurso
+        fields = ['id', 'nombre']
+
 
 class ServicioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Servicio
         fields = ['id', 'nombre']
 
+
 class ReservaSerializer(serializers.ModelSerializer):
-    # Campos para lectura
-    peluqueria = PeluqueriaSerializer(read_only=True)
+    # Lectura
+    negocio = NegocioSerializer(read_only=True)
+    recurso = RecursoSerializer(read_only=True)
     servicio = ServicioSerializer(read_only=True)
 
-    # Campos para escritura (IDs)
-    peluqueria_id = serializers.PrimaryKeyRelatedField(
-        queryset=Peluqueria.objects.all(), source='peluqueria', write_only=True
+    # Escritura (IDs)
+    negocio_id = serializers.PrimaryKeyRelatedField(
+        queryset=Negocio.objects.all(),
+        source='negocio',
+        write_only=True
     )
+
+    recurso_id = serializers.PrimaryKeyRelatedField(
+        queryset=Recurso.objects.all(),
+        source='recurso',
+        write_only=True
+    )
+
     servicio_id = serializers.PrimaryKeyRelatedField(
-        queryset=Servicio.objects.all(), source='servicio', write_only=True
+        queryset=Servicio.objects.all(),
+        source='servicio',
+        write_only=True
     )
 
     class Meta:

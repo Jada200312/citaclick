@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     ReservaListCreate,
     ReservaRetrieveUpdateDestroy,
-    ReservaListByPeluqueriaFecha,
+    ReservaListByNegocioFecha,
     GananciasView,
     AñosDisponiblesView,
     MesesDisponiblesView,
@@ -14,7 +14,7 @@ urlpatterns = [
     # CRUD de reservas
     path('', ReservaListCreate.as_view(), name='reservas-list-create'),
     path('<int:pk>/', ReservaRetrieveUpdateDestroy.as_view(), name='reserva-detail'),
-    path('por-fecha/', ReservaListByPeluqueriaFecha.as_view(), name='reservas-por-fecha'),
+    path('por-fecha/', ReservaListByNegocioFecha.as_view(), name='reservas-por-fecha'),
 
     # Ganancias
     path('ganancias/', GananciasView.as_view(), name='ganancias'),

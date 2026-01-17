@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/usuarios/', include('usuarios.urls')),
     path('api/peluquerias/', include('peluquerias.urls')),
+    path('api/negocios/', include('negocios.urls')),
     path('api/servicios/', include('servicios.urls')),
     path('api/reservas/', include('reservas.urls')),
     path('api/token/', TokenObtainPairView.as_view()),

@@ -1,15 +1,16 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
 from .models import Servicio, Categoria
 from .serializers import ServicioSerializer, CategoriaSerializer
 
 
-class ServiciosPorPeluqueriaView(APIView):
+class ServiciosPorNegocioView(APIView):
     permission_classes = []
 
-    def get(self, request, peluqueria_id):
-        servicios = Servicio.objects.filter(peluqueria_id=peluqueria_id)
+    def get(self, request, negocio_id):
+        servicios = Servicio.objects.filter(negocio_id=negocio_id)
         serializer = ServicioSerializer(servicios, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -19,10 +20,10 @@ class ServicioListCreate(generics.ListCreateAPIView):
     permission_classes = []
 
     def get_queryset(self):
-        peluqueria_id = self.request.query_params.get('peluqueria_id')
-        if peluqueria_id:
-            return Servicio.objects.filter(peluqueria_id=peluqueria_id)
-        return Servicio.objects.none()  # O Servicio.objects.all() si quieres mostrar todos cuando no se filtre
+        negocio_id = self.request.query_params.get('negocio_id')
+        if negocio_id:
+            return Servicio.objects.filter(negocio_id=negocio_id)
+        return Servicio.objects.none()
 
 
 class ServicioRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):

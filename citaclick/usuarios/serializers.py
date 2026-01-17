@@ -6,7 +6,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
     # Nombre del rol como string
     rol = serializers.CharField(source='rol.nombre', read_only=True)
     # ID del rol para leer y escribir
-    rol_id = serializers.SerializerMethodField()
+    rol_id = serializers.PrimaryKeyRelatedField(
+    queryset=Rol.objects.all(),
+    source='rol',
+    write_only=True
+)
+
     
     # ID de la peluquería relacionada (si existe)
     peluqueria_id = serializers.SerializerMethodField()
