@@ -23,7 +23,7 @@ const ListadoPeluquerias = () => {
     }
 
     axios
-      .get("http://localhost:8000/api/peluquerias/", {
+      .get("http://localhost:8000/api/negocios/", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setPeluquerias(res.data))
