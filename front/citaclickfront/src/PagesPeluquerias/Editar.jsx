@@ -13,7 +13,7 @@ const Editar = () => {
   const [imagenActual, setImagenActual] = useState('');
 
   const token = localStorage.getItem('access_token');
-  const rolId = localStorage.getItem("rol_id");
+  const rolId = localStorage.getItem("rol");
   const peluqueriaId = localStorage.getItem("peluqueria_id");
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const Editar = () => {
 
     if (!token || !usuarioId) {
       navigate("/login");
-    } else if (rolId !== "2") {
+    } else if (rolId == "cliente") {
       navigate("/");
     }
   }, [navigate, usuarioId, rolId]);

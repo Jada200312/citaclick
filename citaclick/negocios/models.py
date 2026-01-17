@@ -12,8 +12,6 @@ class Plan(models.Model):
     def __str__(self):
         return self.nombre
 
-
-# Horario general del negocio
 class HorarioNegocio(models.Model):
     horaInicio = models.TimeField()
     horaFin = models.TimeField()
@@ -23,7 +21,6 @@ class HorarioNegocio(models.Model):
         return f"{self.horaInicio} - {self.horaFin}"
 
 
-# Horario individual de cada recurso
 class HorarioRecurso(models.Model):
     horaInicio = models.TimeField()
     horaFin = models.TimeField()
@@ -36,7 +33,6 @@ class HorarioRecurso(models.Model):
 class TipoNegocio(models.Model):
     nombre = models.CharField(max_length=100)
     recurso_nombre = models.CharField(max_length=100)
-    # Ej: ("Restaurante","Mesa"), ("Peluquería","Silla")
 
     def __str__(self):
         return self.nombre

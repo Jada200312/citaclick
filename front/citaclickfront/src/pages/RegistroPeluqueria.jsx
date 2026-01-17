@@ -180,7 +180,7 @@ function Registrarpeluqueria() {
 
         <div>
           <label className="block text-sm font-medium text-white">
-            Nombre de la Peluqueria:
+            Nombre del negocio:
           </label>
           <input
             type="text"

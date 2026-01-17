@@ -27,14 +27,14 @@ const MenuPrincipal = ({ peluqueriaId }) => {
   };
 
   const usuarioId = obtenerUsuarioDesdeToken();
-  const rolId = localStorage.getItem("rol_id");
+  const rolId = localStorage.getItem("rol");
 
   // 🔹 Validar acceso
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token || !usuarioId) {
       navigate("/login");
-    } else if (rolId !== "2") {
+    } else if (rolId == "cliente") {
       navigate("/"); 
     }
   }, [navigate, usuarioId, rolId]);

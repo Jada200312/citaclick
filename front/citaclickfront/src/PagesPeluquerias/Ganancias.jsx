@@ -35,14 +35,14 @@ const Ganancias = () => {
   };
 
   const usuarioId = obtenerUsuarioDesdeToken();
-  const rolId = localStorage.getItem("rol_id");
+  const rolId = localStorage.getItem("rol");
 
   useEffect(() => {
     if (!usuarioId) {
       navigate("/login");
       return;
     }
-    if (rolId !=="2") {
+    if (rolId =="cliente") {
       navigate("/");
       return;
     }

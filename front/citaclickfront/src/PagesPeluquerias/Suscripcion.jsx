@@ -22,7 +22,7 @@ const Suscripcion = () => {
   };
 
   const usuarioId = obtenerUsuarioDesdeToken();
-  const rolId = localStorage.getItem("rol_id");
+  const rolId = localStorage.getItem("rol");
 
   // 🔹 Validar acceso y cargar planes
   useEffect(() => {
@@ -32,7 +32,7 @@ const Suscripcion = () => {
       navigate("/login");
       return;
     }
-    if (rolId !=="2") {
+    if (rolId =="cliente") {
       navigate("/");
       return;
     }
