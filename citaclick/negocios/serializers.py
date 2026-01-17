@@ -67,3 +67,32 @@ class TipoNegocioSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoNegocio
         fields = '__all__'
+
+
+class RecursoMasivoSerializer(serializers.Serializer):
+    negocio = serializers.PrimaryKeyRelatedField(queryset=Negocio.objects.all())
+    cantidad = serializers.IntegerField(min_value=1, max_value=500)
+    horario = serializers.PrimaryKeyRelatedField(
+        queryset=HorarioRecurso.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
+    def create(self, validated_data):
+        negocio = validated_data["negocio"]
+        cantidad = validated_data["cantidad"]
+        horario = validated_data.get("horario")
+
+        # Nombre base según tipo de negocio
+        nombre_base = negocio.tipo.recurso_nombre  # ej: "Mesa", "Cancha", "Silla"
+
+        recursos_creados = []
+        for i in range(1, cantidad + 1):
+            recurso = Recurso.objects.create(
+                negocio=negocio,
+                nombre=f"{nombre_base} {i}",
+                horario=horario
+            )
+            recursos_creados.append(recurso)
+
+        return recursos_creados

@@ -296,3 +296,17 @@ class TipoNegocioListView(generics.ListAPIView):
     serializer_class = TipoNegocioSerializer
     permission_classes = [permissions.AllowAny]
 
+
+
+class CrearRecursosMasivos(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = RecursoMasivoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        recursos = serializer.save()
+
+        return Response({
+            "mensaje": f"{len(recursos)} recursos creados correctamente"
+        }, status=status.HTTP_201_CREATED)
+

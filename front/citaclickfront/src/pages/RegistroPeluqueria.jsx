@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Logo from "../assets/log.png";
 import { useNavigate } from "react-router-dom";
 
@@ -13,20 +13,33 @@ function Registrarpeluqueria() {
   const [intervalo_tiempo, setIntervaloTiempo] = useState("");
   const [imagen, setImagen] = useState(null);
   const [alerta, setAlerta] = useState(null);
+  const [cantidadRecursos, setCantidadRecursos] = useState("");
+  const [nombreRecurso, setNombreRecurso] = useState("");
   const tipoNegocioId = localStorage.getItem("tipoNegocioId");
 
+  useEffect(() => {
+    const cargarTipoNegocio = async () => {
+      const res = await fetch(
+        "http://localhost:8000/api/negocios/tipos-negocio/"
+      );
+      const data = await res.json();
+
+      const tipoSeleccionado = data.find(
+        (t) => t.id === parseInt(tipoNegocioId)
+      );
+
+      if (tipoSeleccionado) {
+        setNombreRecurso(tipoSeleccionado.recurso_nombre);
+      }
+    };
+
+    cargarTipoNegocio();
+  }, []);
 
   const manejarEnvio = async (e) => {
     e.preventDefault();
 
-    const fechaRegistro = new Date();
-    const fechaVencimiento = new Date();
-    fechaVencimiento.setMonth(fechaVencimiento.getMonth() + 1);
-    const fechaRegistroFormateada = fechaRegistro.toISOString().split("T")[0];
-    const fechaVencimientoFormateada = fechaVencimiento
-      .toISOString()
-      .split("T")[0];
-
+    // Validar campos
     if (
       !nombre ||
       !direccion ||
@@ -34,24 +47,25 @@ function Registrarpeluqueria() {
       !horaInicio ||
       !horaFin ||
       !intervalo_tiempo ||
-      !imagen
+      !imagen ||
+      !cantidadRecursos ||
+      parseInt(cantidadRecursos) <= 0
     ) {
       setAlerta({
         tipo: "error",
-        mensaje: "Todos los campos son obligatorios.",
+        mensaje:
+          "Todos los campos son obligatorios y la cantidad de puestos debe ser mayor a 0.",
       });
       return;
     }
 
     try {
-      // 1. Crear horario
+      // 1️⃣ Crear horario
       const resHorario = await fetch(
         "http://localhost:8000/api/negocios/horarios-negocio/",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             horaInicio,
             horaFin,
@@ -76,18 +90,26 @@ function Registrarpeluqueria() {
       const horarioCreado = await resHorario.json();
       const horario_Id = horarioCreado.id;
 
-      // Crear peluquería con el horarioId
+      // 2️⃣ Crear peluquería con el horario
+      const fechaRegistro = new Date();
+      const fechaVencimiento = new Date();
+      fechaVencimiento.setMonth(fechaVencimiento.getMonth() + 1);
+
       const formData = new FormData();
       formData.append("nombre", nombre);
       formData.append("direccion", direccion);
       formData.append("ciudad", ciudad);
       formData.append("imagen", imagen);
-      formData.append("fecha_registro", fechaRegistroFormateada);
-      formData.append("fecha_vencimiento", fechaVencimientoFormateada);
+      formData.append(
+        "fecha_registro",
+        fechaRegistro.toISOString().split("T")[0]
+      );
+      formData.append(
+        "fecha_vencimiento",
+        fechaVencimiento.toISOString().split("T")[0]
+      );
       formData.append("horario_general", horario_Id);
       formData.append("tipo", tipoNegocioId);
-      console.log("Tipo negocio:", tipoNegocioId);
-
 
       const resPeluqueria = await fetch("http://localhost:8000/api/negocios/", {
         method: "POST",
@@ -103,20 +125,45 @@ function Registrarpeluqueria() {
           errorData.detail ||
           Object.values(errorData).flat().join("\n") ||
           "Error al registrar la peluquería.";
+        setAlerta({ tipo: "error", mensaje: `Error:\n${mensaje}` });
+        return;
+      }
+
+      const peluqueriaCreada = await resPeluqueria.json();
+      const negocioId = peluqueriaCreada.id;
+
+      // 3️⃣ Crear recursos automáticamente
+      const resRecursos = await fetch(
+        "http://localhost:8000/api/negocios/recursos/crear-masivo/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            negocio: negocioId,
+            cantidad: parseInt(cantidadRecursos),
+          }),
+        }
+      );
+
+      if (!resRecursos.ok) {
+        const errorData = await resRecursos.json();
+        console.error("Error creando recursos:", errorData);
         setAlerta({
           tipo: "error",
-          mensaje: `Error:\n${mensaje}`,
+          mensaje:
+            "La peluquería se creó, pero hubo un error generando los puestos.",
         });
         return;
       }
 
-      await resPeluqueria.json();
-
+      // ✅ Todo salió bien
       setAlerta({
         tipo: "exito",
-        mensaje: "Peluquería registrada correctamente.",
+        mensaje: "Peluquería y recursos registrados correctamente.",
       });
-      navigate("/");
 
       // Limpiar campos
       setNombre("");
@@ -126,6 +173,10 @@ function Registrarpeluqueria() {
       setHoraFin("");
       setIntervaloTiempo("");
       setImagen(null);
+      setCantidadRecursos("");
+
+      // Navegar al inicio
+      navigate("/");
     } catch (err) {
       console.error("Error inesperado:", err);
       setAlerta({
@@ -251,6 +302,31 @@ function Registrarpeluqueria() {
               required
             />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-white">
+            Tipo de recurso que tendrá tu negocio:
+          </label>
+          <input
+            type="text"
+            value={nombreRecurso}
+            readOnly
+            className="mt-1 block w-full border border-gray-400 bg-gray-100 rounded px-3 py-2 shadow-sm cursor-not-allowed"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-white">
+            Cantidad de {nombreRecurso}:
+          </label>
+          <input
+            type="number"
+            value={cantidadRecursos}
+            onChange={(e) => setCantidadRecursos(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 shadow-sm"
+            required
+          />
         </div>
 
         <div>

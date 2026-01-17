@@ -29,4 +29,6 @@ urlpatterns = [
     path('buscar-disponibles/', BuscarNegociosDisponibles.as_view(), name='buscar-negocios-disponibles'),
 
     path('tipos-negocio/', TipoNegocioListView.as_view(), name='tipos-negocio'),
+
+    path('recursos/crear-masivo/', CrearRecursosMasivos.as_view(), name='crear-recursos-masivo'),
 ]
