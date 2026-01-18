@@ -12,9 +12,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
     source='rol',
     write_only=True
 )
-
-    
-    # ID de la peluquería relacionada (si existe)
     negocio_id = serializers.SerializerMethodField()
 
     class Meta:
@@ -35,7 +32,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
     ]
         extra_kwargs = {'password': {'write_only': True}}
 
-    # Método para devolver peluqueria_id
     def get_negocio_id(self, obj):
         try:
             return obj.negocio.id
