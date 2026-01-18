@@ -31,4 +31,8 @@ urlpatterns = [
     path('tipos-negocio/', TipoNegocioListView.as_view(), name='tipos-negocio'),
 
     path('recursos/crear-masivo/', CrearRecursosMasivos.as_view(), name='crear-recursos-masivo'),
+
+    path('recursos/', RecursosNegocioView.as_view(), name='recursos-negocio'),
+    path('recursos/<int:pk>/', RecursoRetrieveUpdateDestroy.as_view(), name='recurso-detail'),
+
 ]

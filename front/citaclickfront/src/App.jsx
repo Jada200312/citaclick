@@ -20,6 +20,8 @@ import Agregar from './PagesPeluquerias/Agregar';
 import EditarOEliminar from './PagesPeluquerias/EditarOEliminar.jsx';
 import Editar from './PagesPeluquerias/Editar.jsx';
 import BusquedaAvanzadaPeluquerias from './pages/BusquedaAvanzadaPeluquerias.jsx';
+import Recursos from "./PagesPeluquerias/Recursos";
+
 
 import './index.css';
 
@@ -48,6 +50,7 @@ function App() {
           <Route path="/agregar" element={<Agregar />} />
           <Route path="/editaroeliminar" element={<EditarOEliminar />} />
           <Route path="/editar/:id" element={<Editar />} />
+          <Route path="/recursos" element={<Recursos />} />
         </Routes>
         <Footer />
       </AuthProvider>

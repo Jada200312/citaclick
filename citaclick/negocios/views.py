@@ -291,6 +291,12 @@ class HorarioRecursoRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView)
     permission_classes = [permissions.IsAuthenticated]
 
 
+class RecursoRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Recurso.objects.all()
+    serializer_class = RecursoSerializer
+    permission_classes = [IsAuthenticated]
+
+
 class TipoNegocioListView(generics.ListAPIView):
     queryset = TipoNegocio.objects.all()
     serializer_class = TipoNegocioSerializer
@@ -310,3 +316,16 @@ class CrearRecursosMasivos(APIView):
             "mensaje": f"{len(recursos)} recursos creados correctamente"
         }, status=status.HTTP_201_CREATED)
 
+class RecursosNegocioView(generics.ListAPIView):
+    serializer_class = RecursoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        usuario = self.request.user
+
+        # Solo propietarios (rol_id = 2)
+        if usuario.rol_id != 2:
+            return Recurso.objects.none()
+
+        # Filtramos recursos cuyo negocio tiene como propietario al usuario logueado
+        return Recurso.objects.filter(negocio__propietario=usuario)

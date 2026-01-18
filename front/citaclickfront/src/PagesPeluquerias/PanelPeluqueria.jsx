@@ -6,6 +6,7 @@ import ganancias from "../assets/ganancias.png";
 import reservas from "../assets/Reservas.png";
 import suscripciones from "../assets/Suscripcion.png";
 import gestionservice from "../assets/servicios.png";
+import recursos from "../assets/recursos.png";
 
 const MenuPrincipal = ({ peluqueriaId }) => {
   const navigate = useNavigate();
@@ -41,9 +42,10 @@ const MenuPrincipal = ({ peluqueriaId }) => {
 
   const opciones = [
     { nombre: "Ganancias", imagen: ganancias, ruta: "/ganancias" },
-    { nombre: "Reservas", imagen: reservas, ruta: `/Reservas` }, // dinámico
+    { nombre: "Reservas", imagen: reservas, ruta: `/Reservas` },
     { nombre: "Suscripción", imagen: suscripciones, ruta: "/Suscripcion" },
     { nombre: "Gestionar Servicio", imagen: gestionservice, ruta: "/servicios" },
+    { nombre: "Gestionar Recursos", imagen: recursos, ruta: "/recursos" },
   ];
 
   return (

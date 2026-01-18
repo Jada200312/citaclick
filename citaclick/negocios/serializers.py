@@ -18,7 +18,7 @@ class HorarioNegocioSerializer(serializers.ModelSerializer):
 class HorarioRecursoSerializer(serializers.ModelSerializer):
     class Meta:
         model = HorarioRecurso
-        fields = '__all__'
+        fields = ['id', 'horaInicio', 'horaFin', 'intervalo_tiempo']
 
 
 class NegocioSerializer(serializers.ModelSerializer):
@@ -96,3 +96,18 @@ class RecursoMasivoSerializer(serializers.Serializer):
             recursos_creados.append(recurso)
 
         return recursos_creados
+
+
+class RecursoSerializer(serializers.ModelSerializer):
+    horario = HorarioRecursoSerializer(read_only=True)
+    
+    horario_id = serializers.PrimaryKeyRelatedField(
+        source='horario',
+        queryset=HorarioRecurso.objects.all(),
+        write_only=True,
+        required=False,
+    )
+
+    class Meta:
+        model = Recurso
+        fields = ['id', 'nombre', 'activo', 'horario', 'horario_id', 'negocio']
