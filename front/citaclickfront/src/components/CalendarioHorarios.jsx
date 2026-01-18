@@ -8,12 +8,13 @@ import axios from "axios";
 
 registerLocale("es", es);
 
+// Función para mostrar la hora en formato 12h
 const formatearHora = (hora24) => {
   const parsed = parse(hora24, "HH:mm", new Date());
   return format(parsed, "hh:mm a");
 };
 
-const CalendarioHorarios = ({ peluqueriaId }) => {
+const CalendarioHorarios = ({ recursoId }) => {
   const [fecha, setFecha] = useState(null);
   const [horarios, setHorarios] = useState([]);
   const [cargando, setCargando] = useState(false);
@@ -26,7 +27,7 @@ const CalendarioHorarios = ({ peluqueriaId }) => {
   };
 
   useEffect(() => {
-    if (!fecha) return;
+    if (!fecha || !recursoId) return;
 
     const fetchHorarios = async () => {
       setCargando(true);
@@ -42,22 +43,19 @@ const CalendarioHorarios = ({ peluqueriaId }) => {
 
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/peluquerias/horarios-disponibles/?fecha=${format(
+          `http://localhost:8000/api/negocios/recursos/horarios-disponibles/?fecha=${format(
             fecha,
             "yyyy-MM-dd"
-          )}&peluqueria_id=${peluqueriaId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          )}&recurso_id=${recursoId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        setHorarios(
-          Array.isArray(response.data.horarios_disponibles)
-            ? response.data.horarios_disponibles
-            : []
-        );
+        if (response.data.horarios_disponibles) {
+          setHorarios(response.data.horarios_disponibles);
+        } else {
+          setHorarios([]);
+          setError(response.data.error || "No hay horarios disponibles.");
+        }
       } catch (err) {
         if (err.response && err.response.status === 401) {
           navigate("/login");
@@ -70,21 +68,20 @@ const CalendarioHorarios = ({ peluqueriaId }) => {
     };
 
     fetchHorarios();
-  }, [fecha, peluqueriaId, navigate]);
+  }, [fecha, recursoId, navigate]);
 
   const manejarClick = (horaSeleccionada) => {
     navigate("/reservar", {
       state: {
         fecha: format(fecha, "yyyy-MM-dd"),
         hora: horaSeleccionada,
-        peluqueriaId,
+        recursoId,
       },
     });
   };
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-zinc-950 shadow-xl rounded-xl mt-6">
-      <br />
       <div className="flex justify-center mb-6">
         <DatePicker
           selected={fecha}
@@ -101,28 +98,22 @@ const CalendarioHorarios = ({ peluqueriaId }) => {
       {fecha && (
         <h3 className="text-lg font-semibold text-center mb-4 text-white">
           Horarios disponibles para el{" "}
-          <span className="text-orange-600">
-            {format(fecha, "dd/MM/yyyy")}
-          </span>
+          <span className="text-orange-600">{format(fecha, "dd/MM/yyyy")}</span>
         </h3>
       )}
 
-      {cargando && (
-        <p className="text-center text-zinc-950">Cargando horarios...</p>
-      )}
-
+      {cargando && <p className="text-center text-zinc-950">Cargando horarios...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
 
       {!cargando && horarios.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-zinc-950 max-w-2xl  px-4 py-6 my-6 mx-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-zinc-950 max-w-2xl px-4 py-6 my-6 mx-4">
           {horarios.map((hora) => {
             const ahora = new Date();
             const fechaSeleccionada = new Date(fecha);
             const horaCompleta = parse(hora.hora, "HH:mm", fechaSeleccionada);
 
             const esHoy =
-              format(fechaSeleccionada, "yyyy-MM-dd") ===
-              format(ahora, "yyyy-MM-dd");
+              format(fechaSeleccionada, "yyyy-MM-dd") === format(ahora, "yyyy-MM-dd");
             const esPasada = esHoy && isBefore(horaCompleta, ahora);
 
             const estaDisponible = hora.disponible && !esPasada;
@@ -130,9 +121,7 @@ const CalendarioHorarios = ({ peluqueriaId }) => {
             return (
               <div
                 key={hora.hora}
-                onClick={() =>
-                  estaDisponible ? manejarClick(hora.hora) : null
-                }
+                onClick={() => (estaDisponible ? manejarClick(hora.hora) : null)}
                 className={`rounded-xl p-4 text-center text-sm font-semibold shadow flex flex-col items-center transition duration-300 ${
                   estaDisponible
                     ? "bg-white border border-zinc-950 text-zinc-950 hover:bg-green-50 cursor-pointer"

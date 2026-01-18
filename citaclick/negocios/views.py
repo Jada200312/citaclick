@@ -187,6 +187,54 @@ class HorariosDisponiblesView(APIView):
         })
 
 
+class HorariosDisponiblesRecursoView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        fecha_str = request.GET.get("fecha")
+        recurso_id = request.GET.get("recurso_id")
+
+        if not fecha_str or not recurso_id:
+            return Response({"error": "Parámetros 'fecha' y 'recurso_id' son requeridos."}, status=400)
+
+        fecha = parse_date(fecha_str)
+
+        try:
+            recurso = Recurso.objects.get(id=recurso_id)
+        except Recurso.DoesNotExist:
+            return Response({"error": "Recurso no encontrado."}, status=404)
+
+        if not recurso.activo:
+            return Response({"error": "Este recurso está inactivo."}, status=400)
+
+        if not recurso.horario:
+            return Response({"error": "Este recurso no tiene horario asignado."}, status=400)
+
+        hora_inicio = datetime.combine(fecha, recurso.horario.horaInicio)
+        hora_fin = datetime.combine(fecha, recurso.horario.horaFin)
+        intervalo = timedelta(minutes=recurso.horario.intervalo_tiempo)
+
+        # Filtrar reservas existentes de este recurso en la fecha
+        reservas = Reserva.objects.filter(recurso=recurso, fechaReserva=fecha)
+        horas_reservadas = set(r.horaReserva.strftime('%H:%M') for r in reservas)
+
+        bloques = []
+        actual = hora_inicio
+        while actual + intervalo <= hora_fin:
+            hora_str = actual.time().strftime('%H:%M')
+            bloques.append({
+                "hora": hora_str,
+                "disponible": hora_str not in horas_reservadas
+            })
+            actual += intervalo
+
+        return Response({
+            "fecha": fecha_str,
+            "recurso": recurso.nombre,
+            "horarios_disponibles": bloques
+        })
+
+
 # ==========================
 # CRUD NEGOCIOS
 # ==========================

@@ -117,7 +117,7 @@ function CrearUser() {
   const manejarRedireccion = () => {
     if (rolId === 2) {
       localStorage.setItem("tipoNegocioId", tipoNegocioId);
-      navigate("/peluqueria");
+      navigate("/registrar_negocio");
     } else {
       navigate("/");
     }

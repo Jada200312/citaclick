@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Logo from "../assets/log.png";
 import { useNavigate } from "react-router-dom";
 
-function Registrarpeluqueria() {
+function RegistrarNegocio() {
   document.title = "Registrar Peluqueria";
   const navigate = useNavigate();
   const [nombre, setNombre] = useState("");
@@ -358,4 +358,4 @@ function Registrarpeluqueria() {
     </div>
   );
 }
-export default Registrarpeluqueria;
+export default RegistrarNegocio;
