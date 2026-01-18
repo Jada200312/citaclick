@@ -19,7 +19,7 @@ const VerHorarios = () => {
         Selecciona Una <span className="text-orange-600">Fecha</span>
       </h1>
       <CalendarioHorarios
-        peluqueriaId={negocioId}
+        negocioId={negocioId}
         recursoId={recursoId} // Pasamos el recurso específico
       />
     </div>

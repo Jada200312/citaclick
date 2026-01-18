@@ -38,9 +38,7 @@ function Login() {
       localStorage.setItem("user_id", user.id);
       localStorage.setItem("rol", user.rol);
       localStorage.setItem("rol_id", user.rol_id);
-      if (user.peluqueria_id) {
-        localStorage.setItem("peluqueria_id", user.peluqueria_id);
-      }
+      localStorage.setItem("negocio_id", user.negocio_id);
 
       // 4️⃣ Pasar todo al contexto de Auth
       login({

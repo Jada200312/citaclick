@@ -28,7 +28,7 @@ class ReservaSerializer(serializers.ModelSerializer):
     recurso = RecursoSerializer(read_only=True)
     servicio = ServicioSerializer(read_only=True)
 
-    # Escritura (IDs)
+    # Escritura
     negocio_id = serializers.PrimaryKeyRelatedField(
         queryset=Negocio.objects.all(),
         source='negocio',
@@ -44,7 +44,9 @@ class ReservaSerializer(serializers.ModelSerializer):
     servicio_id = serializers.PrimaryKeyRelatedField(
         queryset=Servicio.objects.all(),
         source='servicio',
-        write_only=True
+        write_only=True,
+        required=False,
+        allow_null=True   # 👈 la clave
     )
 
     class Meta:

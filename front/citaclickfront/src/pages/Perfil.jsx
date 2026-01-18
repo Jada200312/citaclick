@@ -71,7 +71,7 @@ const Perfil = () => {
     axios
       .get(
         `http://localhost:8000/api/reservas/?anio=${anioSeleccionado}&mes=${mesSeleccionado}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       )
       .then((res) => setHistorial(res.data))
       .catch((err) => console.error(err))
@@ -111,7 +111,7 @@ const Perfil = () => {
         dataToSend,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Perfil actualizado:", response.data);
       setUsuario(usuarioEditado);
@@ -138,13 +138,16 @@ const Perfil = () => {
         dataToSend,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       console.log("Contraseña actualizada:", response.data);
       setUsuario(usuarioEditado);
       setCambiarContrasena(false);
     } catch (err) {
-      console.error("Error al actualizar la contraseña", err.response?.data || err);
+      console.error(
+        "Error al actualizar la contraseña",
+        err.response?.data || err,
+      );
       alert("Error: " + JSON.stringify(err.response?.data));
     }
   };
@@ -217,16 +220,20 @@ const Perfil = () => {
             ) : (
               <>
                 <li>
-                  <span className="text-orange-500">• Nombre:</span> {usuario.username}
+                  <span className="text-orange-500">• Nombre:</span>{" "}
+                  {usuario.username}
                 </li>
                 <li>
-                  <span className="text-orange-500">• Apellidos:</span> {usuario.first_name}
+                  <span className="text-orange-500">• Apellidos:</span>{" "}
+                  {usuario.first_name}
                 </li>
                 <li>
-                  <span className="text-orange-500">• Celular:</span> {usuario.celular}
+                  <span className="text-orange-500">• Celular:</span>{" "}
+                  {usuario.celular}
                 </li>
                 <li>
-                  <span className="text-orange-500">• Correo:</span> {usuario.email}
+                  <span className="text-orange-500">• Correo:</span>{" "}
+                  {usuario.email}
                 </li>
               </>
             )}
@@ -290,7 +297,9 @@ const Perfil = () => {
       </div>
       {/* HISTORIAL DE RESERVAS */}
       <div className="bg-zinc-900 p-6 rounded-lg w-full md:w-1/2">
-        <h2 className="text-3xl font-bold text-orange-500 mb-6">Historial de Reservas</h2>
+        <h2 className="text-3xl font-bold text-orange-500 mb-6">
+          Historial de Reservas
+        </h2>
 
         {/* Select Año */}
         <div className="mb-4">
@@ -348,10 +357,19 @@ const Perfil = () => {
             <tbody>
               {historial.map((reserva) => (
                 <tr key={reserva.id} className="hover:bg-gray-200">
-                  <td className="p-2 border border-gray-600">{reserva.fechaReserva}</td>
-                  <td className="p-2 border border-gray-600">{reserva.horaReserva}</td>
-                  <td className="p-2 border border-gray-600">{reserva.peluqueria.nombre}</td>
-                  <td className="p-2 border border-gray-600">{reserva.servicio.nombre}</td>
+                  <td className="p-2 border border-gray-600">
+                    {reserva.fechaReserva}
+                  </td>
+                  <td className="p-2 border border-gray-600">
+                    {reserva.horaReserva}
+                  </td>
+                  <td className="p-2 border">
+                    {reserva.negocio?.nombre || "—"}
+                  </td>
+
+                  <td className="p-2 border">
+                    {reserva.servicio?.nombre || "Sin servicio"}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -359,7 +377,9 @@ const Perfil = () => {
         ) : anioSeleccionado ? (
           <p className="text-gray-400">No hay reservas para este filtro.</p>
         ) : (
-          <p className="text-gray-400">Seleccione un año para ver el historial.</p>
+          <p className="text-gray-400">
+            Seleccione un año para ver el historial.
+          </p>
         )}
       </div>
     </div>

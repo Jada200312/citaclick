@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Usuario, Rol
-from peluquerias.models import Peluqueria
+from negocios.models import Negocio
+
 
 class UsuarioSerializer(serializers.ModelSerializer):
     # Nombre del rol como string
@@ -14,31 +15,31 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     
     # ID de la peluquería relacionada (si existe)
-    peluqueria_id = serializers.SerializerMethodField()
+    negocio_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Usuario
         fields = [
-            'id',
-            'username',
-            'password',
-            'email',
-            'first_name',
-            'last_name',
-            'rol',        # nombre del rol
-            'rol_id',     # id del rol
-            'celular',
-            'cedula',
-            'imagen',
-            'peluqueria_id'
-        ]
+        'id',
+        'username',
+        'password',
+        'email',
+        'first_name',
+        'last_name',
+        'rol',
+        'rol_id',
+        'celular',
+        'cedula',
+        'imagen',
+        'negocio_id'
+    ]
         extra_kwargs = {'password': {'write_only': True}}
 
     # Método para devolver peluqueria_id
-    def get_peluqueria_id(self, obj):
+    def get_negocio_id(self, obj):
         try:
-            return Peluqueria.objects.get(usuario=obj).id
-        except Peluqueria.DoesNotExist:
+            return obj.negocio.id
+        except Negocio.DoesNotExist:
             return None
 
     # Método para devolver rol_id

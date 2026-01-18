@@ -14,7 +14,7 @@ const formatearHora = (hora24) => {
   return format(parsed, "hh:mm a");
 };
 
-const CalendarioHorarios = ({ recursoId }) => {
+const CalendarioHorarios = ({ negocioId, recursoId }) => {
   const [fecha, setFecha] = useState(null);
   const [horarios, setHorarios] = useState([]);
   const [cargando, setCargando] = useState(false);
@@ -75,6 +75,7 @@ const CalendarioHorarios = ({ recursoId }) => {
       state: {
         fecha: format(fecha, "yyyy-MM-dd"),
         hora: horaSeleccionada,
+        negocioId,
         recursoId,
       },
     });

@@ -5,24 +5,21 @@ import axios from "axios";
 const Reservar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { fecha, hora, peluqueriaId } = location.state || {};
+  const { fecha, hora, negocioId, recursoId } = location.state || {};
 
   const [servicioId, setServicioId] = useState("");
   const [cargando, setCargando] = useState(false);
   const [servicios, setServicios] = useState([]);
 
-  // Obtener ID del usuario desde el token JWT
+  // Obtener usuario desde token
   const obtenerUsuarioDesdeToken = () => {
     const token = localStorage.getItem("access_token");
-    if (!token) {
-      navigate("/login");
-    }
+    if (!token) return null;
 
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.user_id || payload.user || payload.id; // Ajusta según el backend
-    } catch (error) {
-      console.error("Error al decodificar el token:", error);
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.user_id || payload.user || payload.id;
+    } catch {
       return null;
     }
   };
@@ -32,77 +29,59 @@ const Reservar = () => {
   // Validar sesión
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    if (!token || !usuarioId) {
-      navigate("/login");
-    }
+    if (!token || !usuarioId) navigate("/login");
   }, [navigate, usuarioId]);
 
-  // Obtener servicios por peluquería
+  // Obtener servicios del negocio
   useEffect(() => {
     const fetchServicios = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/servicios/?peluqueria_id=${peluqueriaId}`
+          `http://localhost:8000/api/servicios/?peluqueria_id=${negocioId}`,
         );
         setServicios(response.data);
       } catch (error) {
-        console.error("❌ Error al obtener servicios:", error);
+        console.error("Error al obtener servicios:", error);
       }
     };
 
-    if (peluqueriaId) {
-      fetchServicios();
-    }
-  }, [peluqueriaId]);
+    if (negocioId) fetchServicios();
+  }, [negocioId]);
 
   // Enviar reserva
   const manejarReserva = async () => {
-    if (!servicioId) {
-      alert("Por favor selecciona un servicio.");
-      return;
-    }
-
     if (!usuarioId) {
       alert("Usuario no autenticado.");
       return;
     }
 
     setCargando(true);
-
     const token = localStorage.getItem("access_token");
 
     const datosReserva = {
       fechaReserva: fecha,
       horaReserva: hora,
-      peluqueria_id: parseInt(peluqueriaId, 10),
-      servicio_id: parseInt(servicioId, 10),
-      usuario: parseInt(usuarioId, 10),
+      usuario: Number(usuarioId),
+
+      negocio_id: Number(negocioId),
+      recurso_id: Number(recursoId),
     };
 
-    console.log("📤 Enviando datos a la API:", datosReserva);
+    // solo si hay servicio
+    if (servicioId) {
+      datosReserva.servicio_id = Number(servicioId);
+    }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/reservas/",
-        datosReserva,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      console.log("✅ Respuesta del servidor:", response.data);
+      await axios.post("http://localhost:8000/api/reservas/", datosReserva, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       alert("✅ Reserva realizada con éxito");
-      setTimeout(() => navigate("/"), 1000);
+      setTimeout(() => navigate("/"), 800);
     } catch (error) {
-      console.error("❌ Error en la reserva:", error.response?.data || error);
-      const mensajeError =
-        error.response?.data?.detail ||
-        error.response?.data?.message ||
-        "❌ Error al reservar.";
-      alert(mensajeError);
+      console.error("Error en la reserva:", error.response?.data || error);
+      alert("❌ No se pudo realizar la reserva");
     } finally {
       setCargando(false);
     }
@@ -114,19 +93,19 @@ const Reservar = () => {
         <h1 className="text-xl font-bold">
           Confirmar <span className="text-orange-500">Reserva</span>
         </h1>
-        <br />
+
         <p className="mb-2 text-black">📅 Fecha: {fecha}</p>
         <p className="mb-2 text-black">🕒 Hora: {hora}</p>
-        <p className="mb-2 text-black">💈 Peluquería ID: {peluqueriaId}</p>
 
+        {/* Servicio opcional */}
         <div className="mt-4">
-          <label className="">Selecciona un servicio:</label>
+          <label>Servicio (opcional):</label>
           <select
             value={servicioId}
             onChange={(e) => setServicioId(e.target.value)}
             className="text-black p-2 rounded w-full block mb-2 border"
           >
-            <option value="">Selecciona</option>
+            <option value="">Sin servicio</option>
             {servicios.map((servicio) => (
               <option key={servicio.id} value={servicio.id}>
                 {servicio.nombre}
@@ -138,7 +117,7 @@ const Reservar = () => {
         <button
           onClick={manejarReserva}
           disabled={cargando}
-          className="mt-6 bg-orange-600 hover:bg-orange-500 px-4 py-2 rounded"
+          className="mt-6 bg-orange-600 hover:bg-orange-500 px-4 py-2 rounded text-white"
         >
           {cargando ? "Reservando..." : "Confirmar Reserva"}
         </button>
