@@ -13,6 +13,19 @@ const Editar = () => {
   const [imagenActual, setImagenActual] = useState('');
 
   const token = localStorage.getItem('access_token');
+    const obtenerUsuarioDesdeToken = () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.user_id || payload.user || payload.id;
+    } catch (error) {
+      console.error("Error al decodificar el token:", error);
+      return null;
+    }
+  };
+  const usuarioId = obtenerUsuarioDesdeToken();
   const rolId = localStorage.getItem("rol");
   const peluqueriaId = localStorage.getItem("peluqueria_id");
 

@@ -329,3 +329,14 @@ class RecursosNegocioView(generics.ListAPIView):
 
         # Filtramos recursos cuyo negocio tiene como propietario al usuario logueado
         return Recurso.objects.filter(negocio__propietario=usuario)
+    
+
+class RecursosClienteView(generics.ListAPIView):
+    serializer_class = RecursoSerializer
+    permission_classes = [permissions.AllowAny]  # cualquier usuario puede ver
+
+    def get_queryset(self):
+        negocio_id = self.request.query_params.get('negocio_id')
+        if negocio_id:
+            return Recurso.objects.filter(negocio_id=negocio_id)
+        return Recurso.objects.none()  # si no se pasa id, devolvemos vacío

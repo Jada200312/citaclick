@@ -19,7 +19,7 @@ const EditarOEliminar = () => {
       return null;
     }
   };
-
+  const usuarioId = obtenerUsuarioDesdeToken();
   const rolId = localStorage.getItem("rol");
   const peluqueriaId = localStorage.getItem("peluqueria_id");
 

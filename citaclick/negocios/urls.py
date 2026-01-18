@@ -34,5 +34,6 @@ urlpatterns = [
 
     path('recursos/', RecursosNegocioView.as_view(), name='recursos-negocio'),
     path('recursos/<int:pk>/', RecursoRetrieveUpdateDestroy.as_view(), name='recurso-detail'),
+    path('recursos/cliente/', RecursosClienteView.as_view(), name='recursos-cliente'),
 
 ]

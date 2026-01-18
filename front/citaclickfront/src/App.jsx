@@ -8,6 +8,7 @@ import Login from './pages/login.jsx';
 import RegistrarUser from './pages/RegistrarUser';
 import RegistroPeluqueria from './pages/RegistroPeluqueria';
 import ListadoPeluquerias from './pages/listado_peluquerias';
+import RecursosCliente from './pages/RecursosCliente.jsx';
 import Perfil from './pages/Perfil.jsx';
 import VerHorarios from './pages/Ver_Horarios.jsx';
 import Reservar from './pages/Reservar.jsx';
@@ -36,6 +37,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/registrar" element={<RegistrarUser />} />
           <Route path="/peluqueria" element={<RegistroPeluqueria />} />
+          <Route path="/negocio/:id/recursos" element={<RecursosCliente />} />
           <Route path="/listado_peluquerias" element={<ListadoPeluquerias />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/peluqueria/:id" element={<VerHorarios />} />

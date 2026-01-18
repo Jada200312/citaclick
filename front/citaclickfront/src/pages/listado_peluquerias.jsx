@@ -3,18 +3,18 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Star } from "lucide-react";
 
-const ListadoPeluquerias = () => {
-  const [peluquerias, setPeluquerias] = useState([]);
+const ListadoNegocios = () => {
+  const [negocios, setNegocios] = useState([]);
   const [filtro, setFiltro] = useState("");
   const [selectedRatings, setSelectedRatings] = useState({});
   const [showModal, setShowModal] = useState(false);
-  const [currentPeluqueria, setCurrentPeluqueria] = useState(null);
+  const [currentNegocio, setCurrentNegocio] = useState(null);
   const [ratingValue, setRatingValue] = useState(0);
   const [comentario, setComentario] = useState("");
 
   const navigate = useNavigate();
 
-  const fetchPeluquerias = () => {
+  const fetchNegocios = () => {
     const token = localStorage.getItem("access_token");
 
     if (!token) {
@@ -26,26 +26,27 @@ const ListadoPeluquerias = () => {
       .get("http://localhost:8000/api/negocios/", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setPeluquerias(res.data))
+      .then((res) => setNegocios(res.data))
       .catch((err) => {
-        console.error("Error cargando peluquerías:", err);
+        console.error("Error cargando negocios:", err);
         if (err.response?.status === 401) navigate("/login");
       });
   };
 
   useEffect(() => {
-    fetchPeluquerias();
+    fetchNegocios();
   }, []);
 
-  const peluqueriasFiltradas = peluquerias.filter((p) =>
-    p.nombre.toLowerCase().includes(filtro.toLowerCase())
+  const negociosFiltrados = negocios.filter((n) =>
+    n.nombre.toLowerCase().includes(filtro.toLowerCase())
   );
 
   const irABusquedaAvanzada = () => navigate("/busqueda-avanzada");
-  const verHorarios = (id) => navigate(`/peluqueria/${id}`);
 
-  const handleStarClick = (peluqueriaId, rating) => {
-    setCurrentPeluqueria(peluqueriaId);
+  const verRecursos = (id) => navigate(`/negocio/${id}/recursos`);
+
+  const handleStarClick = (negocioId, rating) => {
+    setCurrentNegocio(negocioId);
     setRatingValue(rating);
     setShowModal(true);
   };
@@ -55,57 +56,50 @@ const ListadoPeluquerias = () => {
 
     axios
       .post(
-        `http://localhost:8000/api/peluquerias/${currentPeluqueria}/calificar/`,
+        `http://localhost:8000/api/negocios/${currentNegocio}/calificar/`,
         { calificacion: ratingValue, comentario },
         { headers: { Authorization: `Bearer ${token}` } }
       )
       .then(() => {
         setSelectedRatings((prev) => ({
           ...prev,
-          [currentPeluqueria]: ratingValue,
+          [currentNegocio]: ratingValue,
         }));
         setShowModal(false);
         setComentario("");
-        fetchPeluquerias();
-        window.location.reload();
+        fetchNegocios();
       })
       .catch((err) => {
         console.error("Error al enviar calificación:", err);
         if (err.response?.data?.error?.includes("mes")) {
-          alert("Solo puedes calificar una vez al mes esta peluquería.");
+          alert("Solo puedes calificar una vez al mes este negocio.");
         } else {
           alert("Hubo un error al enviar tu calificación.");
         }
       });
   };
 
-  const renderStars = (peluqueriaId, rating) => {
+  const renderStars = (negocioId, rating) => {
     const totalStars = 5;
-    const currentRating = selectedRatings[peluqueriaId] ?? rating;
-  
+    const currentRating = selectedRatings[negocioId] ?? rating;
+
     return (
       <div className="flex justify-center items-center">
         {[...Array(totalStars)].map((_, index) => {
           const starValue = index + 1;
           let fillPercentage = 0;
-  
-          if (starValue <= Math.floor(currentRating)) {
-            fillPercentage = 100; // estrella llena
-          } else if (starValue - 1 < currentRating && starValue > currentRating) {
-            // estrella parcial
+
+          if (starValue <= Math.floor(currentRating)) fillPercentage = 100;
+          else if (starValue - 1 < currentRating && starValue > currentRating)
             fillPercentage = (currentRating - (starValue - 1)) * 100;
-          }
-  
+
           return (
             <div
               key={index}
               className="relative w-5 h-5"
-              onClick={() => handleStarClick(peluqueriaId, starValue)}
+              onClick={() => handleStarClick(negocioId, starValue)}
             >
-              {/* Estrella gris vacía */}
               <Star className="w-5 h-5 text-gray-400 absolute top-0 left-0" />
-  
-              {/* Estrella rellena con clip parcial */}
               <div
                 className="absolute top-0 left-0 overflow-hidden"
                 style={{ width: `${fillPercentage}%` }}
@@ -118,12 +112,11 @@ const ListadoPeluquerias = () => {
       </div>
     );
   };
-  
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-white text-center">
-        Peluquerías <span className="text-orange-500">Disponibles</span>
+        Negocios <span className="text-orange-500">Disponibles</span>
       </h1>
       <h1 className="text-3xl font-bold mb-4">Reservar una cita</h1>
 
@@ -144,24 +137,24 @@ const ListadoPeluquerias = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {peluqueriasFiltradas.map((peluqueria) => (
+        {negociosFiltrados.map((negocio) => (
           <div
-            key={peluqueria.id}
+            key={negocio.id}
             className="bg-zinc-900 text-white rounded-xl border border-gray-300 p-6 w-full max-w-xs mx-auto text-center space-y-4 shadow-md"
           >
-            <h2 className="text-xl font-semibold">{peluqueria.nombre}</h2>
+            <h2 className="text-xl font-semibold">{negocio.nombre}</h2>
             <hr className="border-t-2 border-orange-500 my-4" />
 
             <div className="flex items-center justify-center text-white space-x-1">
-              <p>{peluqueria.direccion}</p>
+              <p>{negocio.direccion}</p>
               <span>/</span>
-              <p>{peluqueria.ciudad}</p>
+              <p>{negocio.ciudad}</p>
             </div>
 
-            {peluqueria.imagen ? (
+            {negocio.imagen ? (
               <img
-                src={peluqueria.imagen}
-                alt={peluqueria.nombre}
+                src={negocio.imagen}
+                alt={negocio.nombre}
                 className="w-full h-48 object-cover"
               />
             ) : (
@@ -172,24 +165,20 @@ const ListadoPeluquerias = () => {
 
             <div className="p-4">
               <button
-                onClick={() => verHorarios(peluqueria.id)}
+                onClick={() => verRecursos(negocio.id)}
                 className="mt-4 bg-orange-600 hover:bg-orange-400 text-white px-4 py-2 rounded"
               >
-                Ver Horarios
+                Ver Recursos
               </button>
               <hr className="border-t-2 border-orange-500 my-4" />
 
-              {/* Calificación movida debajo del segundo HR */}
               <div className="flex flex-col items-center space-y-1">
-                {renderStars(
-                  peluqueria.id,
-                  peluqueria.promedio_calificaciones
-                )}
+                {renderStars(negocio.id, negocio.promedio_calificaciones)}
                 <p className="text-yellow-400 font-bold">
-                  {peluqueria.promedio_calificaciones?.toFixed(1)} / 5
+                  {negocio.promedio_calificaciones?.toFixed(1)} / 5
                 </p>
                 <p className="text-sm text-gray-400">
-                  ({peluqueria.total_calificaciones} reseñas)
+                  ({negocio.total_calificaciones} reseñas)
                 </p>
               </div>
             </div>
@@ -197,7 +186,7 @@ const ListadoPeluquerias = () => {
         ))}
       </div>
 
-      {/* Modal */}
+      {/* Modal de calificación */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -238,4 +227,4 @@ const ListadoPeluquerias = () => {
   );
 };
 
-export default ListadoPeluquerias;
+export default ListadoNegocios;
