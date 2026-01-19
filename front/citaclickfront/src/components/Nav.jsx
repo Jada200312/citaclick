@@ -95,9 +95,9 @@ function Navbar() {
           <>
             {esPeluqueria && (
               <Link
-                to="/PanelPeluqueria"
+                to="/panelNegocio"
                 className={`block px-3 py-1 rounded-md transition ${
-                  isActive('/PanelPeluqueria') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500'
+                  isActive('/panelNegocio') ? 'bg-orange-500 text-white' : 'hover:bg-orange-500'
                 }`}
               >
                 Panel

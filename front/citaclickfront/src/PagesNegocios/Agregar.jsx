@@ -27,7 +27,7 @@ const Agregar = () => {
 
   const usuarioId = obtenerUsuarioDesdeToken();
   const rolId = localStorage.getItem("rol");
-  const peluqueriaId = localStorage.getItem("peluqueria_id");
+  const negocioId = localStorage.getItem("negocio_id");
 
   // 🔹 Validar acceso
   useEffect(() => {
@@ -56,7 +56,7 @@ const Agregar = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!peluqueriaId) {
+    if (!negocioId) {
       alert("No se pudo identificar la peluquería. Vuelve a iniciar sesión.");
       return;
     }
@@ -66,7 +66,7 @@ const Agregar = () => {
     formData.append("precio", precio);
     formData.append("categoria", categoria);
     formData.append("imagen", imagen);
-    formData.append("peluqueria", peluqueriaId);
+    formData.append("negocio", negocioId);
 
     try {
       const response = await fetch("http://localhost:8000/api/servicios/", {

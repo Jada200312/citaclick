@@ -8,7 +8,7 @@ import suscripciones from "../assets/Suscripcion.png";
 import gestionservice from "../assets/servicios.png";
 import recursos from "../assets/recursos.png";
 
-const MenuPrincipal = ({ peluqueriaId }) => {
+const MenuPrincipal = ({ negocioId }) => {
   const navigate = useNavigate();
 
   // 🔹 Obtener ID usuario desde token JWT

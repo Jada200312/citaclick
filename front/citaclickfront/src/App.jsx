@@ -12,16 +12,17 @@ import RecursosCliente from './pages/RecursosCliente.jsx';
 import Perfil from './pages/Perfil.jsx';
 import VerHorarios from './pages/Ver_Horarios.jsx';
 import Reservar from './pages/Reservar.jsx';
-import PanelPeluqueria from './PagesPeluquerias/PanelPeluqueria.jsx';
-import Ganancias from './PagesPeluquerias/Ganancias.jsx';
-import Reservas from './PagesPeluquerias/Reservas.jsx';
-import Suscripcion from './PagesPeluquerias/Suscripcion.jsx';
-import Servicios from './PagesPeluquerias/Servicios.jsx';
-import Agregar from './PagesPeluquerias/Agregar';
-import EditarOEliminar from './PagesPeluquerias/EditarOEliminar.jsx';
-import Editar from './PagesPeluquerias/Editar.jsx';
 import BusquedaAvanzadaPeluquerias from './pages/BusquedaAvanzadaPeluquerias.jsx';
-import Recursos from "./PagesPeluquerias/Recursos";
+
+import MenuPrincipal from './PagesNegocios/PanelNegocio.jsx';
+import Ganancias from './PagesNegocios/Ganancias.jsx';
+import Reservas from './PagesNegocios/Reservas.jsx';
+import Suscripcion from './PagesNegocios/Suscripcion.jsx';
+import Servicios from './PagesNegocios/Servicios.jsx';
+import Agregar from './PagesNegocios/Agregar';
+import EditarOEliminar from './PagesNegocios/EditarOEliminar.jsx';
+import Editar from './PagesNegocios/Editar.jsx';
+import Recursos from "./PagesNegocios/Recursos";
 
 
 import './index.css';
@@ -44,7 +45,7 @@ function App() {
           <Route path="/reservar" element={<Reservar />} />
           <Route path="/busqueda-avanzada" element={<BusquedaAvanzadaPeluquerias />} />
           {/* Panel Negocios */}
-          <Route path="/panelpeluqueria" element={<PanelPeluqueria />} />
+          <Route path="/panelNegocio" element={<MenuPrincipal />} />
           <Route path="/ganancias" element={<Ganancias />} />
           <Route path="/reservas" element={<Reservas />} />
           <Route path="/suscripcion" element={<Suscripcion />} />

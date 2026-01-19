@@ -3,7 +3,7 @@ import Logo from "../assets/log.png";
 import { useNavigate } from "react-router-dom";
 
 function RegistrarNegocio() {
-  document.title = "Registrar Peluqueria";
+  document.title = "Registrar Negocio";
   const navigate = useNavigate();
   const [nombre, setNombre] = useState("");
   const [direccion, setDireccion] = useState("");
@@ -90,7 +90,6 @@ function RegistrarNegocio() {
       const horarioCreado = await resHorario.json();
       const horario_Id = horarioCreado.id;
 
-      // 2️⃣ Crear peluquería con el horario
       const fechaRegistro = new Date();
       const fechaVencimiento = new Date();
       fechaVencimiento.setMonth(fechaVencimiento.getMonth() + 1);
@@ -111,7 +110,7 @@ function RegistrarNegocio() {
       formData.append("horario_general", horario_Id);
       formData.append("tipo", tipoNegocioId);
 
-      const resPeluqueria = await fetch("http://localhost:8000/api/negocios/", {
+      const resNegocio = await fetch("http://localhost:8000/api/negocios/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -119,18 +118,18 @@ function RegistrarNegocio() {
         body: formData,
       });
 
-      if (!resPeluqueria.ok) {
-        const errorData = await resPeluqueria.json();
+      if (!resNegocio.ok) {
+        const errorData = await resNegocio.json();
         const mensaje =
           errorData.detail ||
           Object.values(errorData).flat().join("\n") ||
-          "Error al registrar la peluquería.";
+          "Error al registrar el negocio.";
         setAlerta({ tipo: "error", mensaje: `Error:\n${mensaje}` });
         return;
       }
 
-      const peluqueriaCreada = await resPeluqueria.json();
-      const negocioId = peluqueriaCreada.id;
+      const negocioCreado = await resNegocio.json();
+      const negocioId = negocioCreado.id;
 
       // 3️⃣ Crear recursos automáticamente
       const resRecursos = await fetch(
@@ -154,7 +153,7 @@ function RegistrarNegocio() {
         setAlerta({
           tipo: "error",
           mensaje:
-            "La peluquería se creó, pero hubo un error generando los puestos.",
+            "El negocio se creó, pero hubo un error generando los puestos.",
         });
         return;
       }
@@ -162,7 +161,7 @@ function RegistrarNegocio() {
       // ✅ Todo salió bien
       setAlerta({
         tipo: "exito",
-        mensaje: "Peluquería y recursos registrados correctamente.",
+        mensaje: "Negocio y recursos registrados correctamente.",
       });
 
       // Limpiar campos
@@ -181,7 +180,7 @@ function RegistrarNegocio() {
       console.error("Error inesperado:", err);
       setAlerta({
         tipo: "error",
-        mensaje: "Error inesperado al registrar la peluquería.",
+        mensaje: "Error inesperado al registrar el negocio.",
       });
     }
   };
@@ -348,7 +347,7 @@ function RegistrarNegocio() {
           type="submit"
           className="bg-orange-500 hover:bg-orange-400 text-white font-bold py-2 px-4 rounded w-full"
         >
-          Registrar peluquería
+          Registrar negocio
         </button>
       </form>
 

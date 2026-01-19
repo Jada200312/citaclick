@@ -27,7 +27,7 @@ const Editar = () => {
   };
   const usuarioId = obtenerUsuarioDesdeToken();
   const rolId = localStorage.getItem("rol");
-  const peluqueriaId = localStorage.getItem("peluqueria_id");
+  const negocioId = localStorage.getItem("negocio_id");
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -84,8 +84,8 @@ const Editar = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!peluqueriaId) {
-      alert("No se pudo identificar la peluquería. Vuelve a iniciar sesión.");
+    if (!negocioId) {
+      alert("No se pudo identificar la negocio. Vuelve a iniciar sesión.");
       return;
     }
 
@@ -93,7 +93,7 @@ const Editar = () => {
     formData.append('nombre', nombre);
     formData.append('precio', precio);
     formData.append('categoria', categoria);
-    formData.append('peluqueria', peluqueriaId);
+    formData.append('negocio', negocioId);
     if (imagen) formData.append('imagen', imagen);
 
     try {

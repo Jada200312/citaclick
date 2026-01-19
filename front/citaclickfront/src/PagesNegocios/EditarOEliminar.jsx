@@ -21,7 +21,7 @@ const EditarOEliminar = () => {
   };
   const usuarioId = obtenerUsuarioDesdeToken();
   const rolId = localStorage.getItem("rol");
-  const peluqueriaId = localStorage.getItem("peluqueria_id");
+  const negocioId = localStorage.getItem("negocio_id");
 
   // Validar acceso
   useEffect(() => {
@@ -36,16 +36,16 @@ const EditarOEliminar = () => {
 
   // Cargar servicios
   useEffect(() => {
-    if (!peluqueriaId) {
-      console.error("No se encontró peluqueria_id en localStorage");
+    if (!negocioId) {
+      console.error("No se encontró negocio_id en localStorage");
       return;
     }
 
-    fetch(`http://localhost:8000/api/servicios/?peluqueria_id=${peluqueriaId}`)
+    fetch(`http://localhost:8000/api/servicios/?peluqueria_id=${negocioId}`)
       .then(res => res.json())
       .then(data => setServicios(data))
       .catch(error => console.error('Error al cargar servicios:', error));
-  }, [peluqueriaId]);
+  }, [negocioId]);
 
   // Cargar categorías
   useEffect(() => {

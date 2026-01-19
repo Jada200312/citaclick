@@ -39,7 +39,7 @@ const Suscripcion = () => {
 
     const fetchPlanes = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/peluquerias/planes/', {
+        const response = await axios.get('http://localhost:8000/api/negocios/planes/', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPlanes(response.data);
