@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import fondoBienvenida from '../assets/indeximg.jpeg';
-import contentcc from '../assets/contentcc.png';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import fondoBienvenida from "../assets/indeximg.jpeg";
+import contentcc from "../assets/contentcc.png";
 
 const Inicio = () => {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -15,15 +16,17 @@ const Inicio = () => {
         const now = Date.now() / 1000;
 
         if (payload.exp < now) {
-          // Token expirado
           localStorage.removeItem("access_token");
-          navigate("/login");
+          setIsLoggedIn(false);
+        } else {
+          setIsLoggedIn(true);
         }
       } catch (error) {
-        // Token inválido o malformado
         localStorage.removeItem("access_token");
-        navigate("/login");
+        setIsLoggedIn(false);
       }
+    } else {
+      setIsLoggedIn(false);
     }
   }, [navigate]);
 
@@ -35,11 +38,14 @@ const Inicio = () => {
       >
         <div className="bg-white/90 p-6 md:p-8 rounded-md shadow-md max-w-xl">
           <h1 className="text-2xl md:text-3xl font-semibold text-gray-800">
-            Te damos la Bienvenida a <span className="font-bold text-gray-900">CitaClick</span>
+            Te damos la Bienvenida a{" "}
+            <span className="font-bold text-gray-900">CitaClick</span>
           </h1>
           <p className="mt-4 text-gray-700 text-sm md:text-base leading-relaxed">
-            Agenda tu turno en la peluquería y obtén un nuevo look espectacular.<br />
-            Elige entre los próximos 7 días para encontrar la fecha perfecta que se adapte a tu agenda.
+            Agenda tu turno en la peluquería y obtén un nuevo look espectacular.
+            <br />
+            Elige entre los próximos 7 días para encontrar la fecha perfecta que
+            se adapte a tu agenda.
           </p>
         </div>
       </div>
@@ -50,17 +56,30 @@ const Inicio = () => {
             ¿Quienes <span className="text-orange-500">Somos</span>?
           </h2>
           <p className="mb-4 text-sm md:text-base leading-relaxed">
-            ¡Este es un espacio excelente! Úsalo para profundizar en tu sección de título llamativo.
-            Explica de qué se trata esta sección, comparte algunos detalles y proporciona la información
-            correcta para captar la atención del público.
+            ¡Este es un espacio excelente! Úsalo para profundizar en tu sección
+            de título llamativo. Explica de qué se trata esta sección, comparte
+            algunos detalles y proporciona la información correcta para captar
+            la atención del público.
           </p>
-          <p className="mb-6 text-sm md:text-base">Añade una llamada a la acción</p>
-          <button
-            className="border border-white text-white py-2 px-6 rounded hover:bg-orange-600 hover:text-white transition"
-            onClick={() => navigate("/login")}
-          >
-            Iniciar Sesión
-          </button>
+          <p className="mb-6 text-sm md:text-base">
+            Añade una llamada a la acción
+          </p>
+
+          {!isLoggedIn ? (
+            <button
+              className="border border-white text-white py-2 px-6 rounded hover:bg-orange-600 transition"
+              onClick={() => navigate("/login")}
+            >
+              Iniciar Sesión
+            </button>
+          ) : (
+            <button
+              className="border border-orange-500 text-orange-500 py-2 px-6 rounded hover:bg-orange-600 hover:text-white transition"
+              onClick={() => navigate("/agendar")}
+            >
+              Agendar
+            </button>
+          )}
         </div>
 
         <div className="flex-1 flex justify-center">

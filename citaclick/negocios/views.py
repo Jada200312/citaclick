@@ -24,95 +24,128 @@ class BuscarNegociosDisponibles(APIView):
     def get(self, request):
         fecha_str = request.GET.get("fecha")
         hora_str = request.GET.get("hora")
+        tipo_id = request.GET.get("tipo")
 
         if not fecha_str or not hora_str:
-            return Response({"error": "Los parámetros 'fecha' y 'hora' son requeridos."}, status=400)
+            return Response({"error": "Fecha y hora requeridas"}, status=400)
 
         fecha = parse_date(fecha_str)
-        try:
-            hora = datetime.strptime(hora_str, "%H:%M").time()
-        except ValueError:
-            return Response({"error": "Formato de hora inválido. Usa HH:MM."}, status=400)
+        hora = datetime.strptime(hora_str, "%H:%M").time()
 
-        negocios_disponibles = []
+        queryset = Negocio.objects.filter(estado=True)
+        if tipo_id:
+            queryset = queryset.filter(tipo_id=tipo_id)
 
-        for negocio in Negocio.objects.all():
-            horario = negocio.horario_negocio
-            if not horario:
-                continue
+        # ==============================
+        # Buscar siguiente bloque real
+        # ==============================
+        def buscar_siguiente():
+            mejores_negocios = []
+            mejor_hora = None
 
-            # Día no disponible
-            if DiaNoDisponible.objects.filter(negocio=negocio, fecha=fecha).exists():
-                continue
+            for negocio in queryset:
+                if DiaNoDisponible.objects.filter(
+                    negocio=negocio, fecha=fecha
+                ).exists():
+                    continue
 
-            # Validar bloque horario
-            hora_inicio = datetime.combine(fecha, horario.horaInicio)
-            hora_fin = datetime.combine(fecha, horario.horaFin)
-            intervalo = timedelta(minutes=horario.intervalo_tiempo)
+                recursos = negocio.recursos.filter(activo=True)
 
-            bloque_encontrado = False
-            actual = hora_inicio
+                for recurso in recursos:
+                    if not recurso.horario:
+                        continue
 
-            while actual + intervalo <= hora_fin:
-                if actual.time() == hora:
-                    bloque_encontrado = True
-                    break
-                actual += intervalo
+                    horario = recurso.horario
+                    inicio = datetime.combine(fecha, horario.horaInicio)
+                    fin = datetime.combine(fecha, horario.horaFin)
+                    intervalo = timedelta(minutes=horario.intervalo_tiempo)
 
-            if not bloque_encontrado:
-                continue
+                    actual = inicio
+                    while actual + intervalo <= fin:
 
-            # Verificar si ya hay reserva
-            ya_reservado = Reserva.objects.filter(
-                negocio=negocio,
-                fechaReserva=fecha,
-                horaReserva=hora
-            ).exists()
+                        # buscamos solo bloques >= hora solicitada
+                        if actual.time() >= hora:
 
-            if ya_reservado:
-                continue
+                            ocupado = Reserva.objects.filter(
+                                recurso=recurso,
+                                fechaReserva=fecha,
+                                horaReserva=actual.time(),
+                            ).exists()
 
-            negocios_disponibles.append(negocio)
+                            if not ocupado:
+                                # guardamos la hora más cercana global
+                                if mejor_hora is None or actual.time() < mejor_hora:
+                                    mejor_hora = actual.time()
+                                    mejores_negocios = [negocio]
+                                elif actual.time() == mejor_hora:
+                                    mejores_negocios.append(negocio)
 
-        serializer = NegocioSerializer(negocios_disponibles, many=True, context={'request': request})
-        return Response(serializer.data)
+                                break  # ya encontramos para este recurso
+
+                        actual += intervalo
+
+            return mejores_negocios, mejor_hora
+
+        negocios, hora_encontrada = buscar_siguiente()
+
+        if negocios:
+            return Response(
+                {
+                    "fallback": hora_encontrada.strftime("%H:%M") != hora_str,
+                    "hora": hora_encontrada.strftime("%H:%M"),
+                    "resultados": NegocioSerializer(
+                        negocios, many=True, context={"request": request}
+                    ).data,
+                }
+            )
+
+        # Si no existe ningún bloque disponible
+        return Response({"fallback": False, "hora": hora_str, "resultados": []})
 
 
 # ==========================
 # CALIFICAR NEGOCIO
 # ==========================
-@api_view(['POST'])
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def calificar_negocio(request, pk):
 
     try:
         negocio = Negocio.objects.get(pk=pk)
     except Negocio.DoesNotExist:
-        return Response({"error": "Negocio no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "Negocio no encontrado"}, status=status.HTTP_404_NOT_FOUND
+        )
 
     calificacion_valor = request.data.get("calificacion")
     comentario = request.data.get("comentario", "")
 
     if not calificacion_valor:
-        return Response({"error": "Debe enviar una calificación"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Debe enviar una calificación"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     hoy = date.today()
     ya_califico = Calificacion.objects.filter(
         negocio=negocio,
         usuario=request.user,
         fecha__year=hoy.year,
-        fecha__month=hoy.month
+        fecha__month=hoy.month,
     ).exists()
 
     if ya_califico:
-        return Response({"error": "Ya calificaste este negocio este mes"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Ya calificaste este negocio este mes"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     calificacion = Calificacion.objects.create(
         negocio=negocio,
         usuario=request.user,
         calificacion=calificacion_valor,
         comentario=comentario,
-        fecha=hoy
+        fecha=hoy,
     )
 
     serializer = CalificacionSerializer(calificacion)
@@ -126,14 +159,16 @@ class PromedioCalificacionesView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, negocio_id):
-        promedio = Calificacion.objects.filter(
-            negocio_id=negocio_id
-        ).aggregate(promedio=Avg('calificacion'))['promedio']
+        promedio = Calificacion.objects.filter(negocio_id=negocio_id).aggregate(
+            promedio=Avg("calificacion")
+        )["promedio"]
 
-        return Response({
-            "negocio_id": negocio_id,
-            "promedio": round(promedio, 2) if promedio else None
-        })
+        return Response(
+            {
+                "negocio_id": negocio_id,
+                "promedio": round(promedio, 2) if promedio else None,
+            }
+        )
 
 
 # ==========================
@@ -147,7 +182,10 @@ class HorariosDisponiblesView(APIView):
         negocio_id = request.GET.get("negocio_id")
 
         if not fecha_str or not negocio_id:
-            return Response({"error": "Parámetros 'fecha' y 'negocio_id' son requeridos."}, status=400)
+            return Response(
+                {"error": "Parámetros 'fecha' y 'negocio_id' son requeridos."},
+                status=400,
+            )
 
         fecha = parse_date(fecha_str)
 
@@ -157,34 +195,39 @@ class HorariosDisponiblesView(APIView):
             return Response({"error": "Negocio no encontrado."}, status=404)
 
         if DiaNoDisponible.objects.filter(negocio=negocio, fecha=fecha).exists():
-            return Response({"mensaje": "El negocio no trabaja en esa fecha."}, status=200)
+            return Response(
+                {"mensaje": "El negocio no trabaja en esa fecha."}, status=200
+            )
 
-        horario = negocio.horario_negocio
+        horario = negocio.horario_general
         if not horario:
-            return Response({"error": "No hay horario configurado para este negocio."}, status=400)
+            return Response(
+                {"error": "No hay horario configurado para este negocio."}, status=400
+            )
 
         hora_inicio = datetime.combine(fecha, horario.horaInicio)
         hora_fin = datetime.combine(fecha, horario.horaFin)
         intervalo = timedelta(minutes=horario.intervalo_tiempo)
 
         reservas = Reserva.objects.filter(negocio=negocio, fechaReserva=fecha)
-        horas_reservadas = set(r.horaReserva.strftime('%H:%M') for r in reservas)
+        horas_reservadas = set(r.horaReserva.strftime("%H:%M") for r in reservas)
 
         bloques = []
         actual = hora_inicio
         while actual + intervalo <= hora_fin:
-            hora_str = actual.time().strftime('%H:%M')
-            bloques.append({
-                "hora": hora_str,
-                "disponible": hora_str not in horas_reservadas
-            })
+            hora_str = actual.time().strftime("%H:%M")
+            bloques.append(
+                {"hora": hora_str, "disponible": hora_str not in horas_reservadas}
+            )
             actual += intervalo
 
-        return Response({
-            "fecha": fecha_str,
-            "negocio": negocio.nombre,
-            "horarios_disponibles": bloques
-        })
+        return Response(
+            {
+                "fecha": fecha_str,
+                "negocio": negocio.nombre,
+                "horarios_disponibles": bloques,
+            }
+        )
 
 
 class HorariosDisponiblesRecursoView(APIView):
@@ -195,7 +238,10 @@ class HorariosDisponiblesRecursoView(APIView):
         recurso_id = request.GET.get("recurso_id")
 
         if not fecha_str or not recurso_id:
-            return Response({"error": "Parámetros 'fecha' y 'recurso_id' son requeridos."}, status=400)
+            return Response(
+                {"error": "Parámetros 'fecha' y 'recurso_id' son requeridos."},
+                status=400,
+            )
 
         fecha = parse_date(fecha_str)
 
@@ -208,7 +254,9 @@ class HorariosDisponiblesRecursoView(APIView):
             return Response({"error": "Este recurso está inactivo."}, status=400)
 
         if not recurso.horario:
-            return Response({"error": "Este recurso no tiene horario asignado."}, status=400)
+            return Response(
+                {"error": "Este recurso no tiene horario asignado."}, status=400
+            )
 
         hora_inicio = datetime.combine(fecha, recurso.horario.horaInicio)
         hora_fin = datetime.combine(fecha, recurso.horario.horaFin)
@@ -216,23 +264,24 @@ class HorariosDisponiblesRecursoView(APIView):
 
         # Filtrar reservas existentes de este recurso en la fecha
         reservas = Reserva.objects.filter(recurso=recurso, fechaReserva=fecha)
-        horas_reservadas = set(r.horaReserva.strftime('%H:%M') for r in reservas)
+        horas_reservadas = set(r.horaReserva.strftime("%H:%M") for r in reservas)
 
         bloques = []
         actual = hora_inicio
         while actual + intervalo <= hora_fin:
-            hora_str = actual.time().strftime('%H:%M')
-            bloques.append({
-                "hora": hora_str,
-                "disponible": hora_str not in horas_reservadas
-            })
+            hora_str = actual.time().strftime("%H:%M")
+            bloques.append(
+                {"hora": hora_str, "disponible": hora_str not in horas_reservadas}
+            )
             actual += intervalo
 
-        return Response({
-            "fecha": fecha_str,
-            "recurso": recurso.nombre,
-            "horarios_disponibles": bloques
-        })
+        return Response(
+            {
+                "fecha": fecha_str,
+                "recurso": recurso.nombre,
+                "horarios_disponibles": bloques,
+            }
+        )
 
 
 # ==========================
@@ -303,7 +352,7 @@ class GananciasListView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        pagos = HistorialPago.objects.all().order_by('fecha_pago')
+        pagos = HistorialPago.objects.all().order_by("fecha_pago")
         data = [{"fecha": p.fecha_pago, "monto": p.monto} for p in pagos]
         return Response(data)
 
@@ -313,14 +362,17 @@ class GananciasListView(APIView):
 # ==========================
 def lista_planes(request):
     planes = Plan.objects.all()
-    data = [{
-        'id': p.id,
-        'nombre': p.nombre,
-        'descripcion': p.descripcion,
-        'precio': str(p.precio),
-        'limite_reservas': p.limite_reservas,
-        'comision': str(p.comision),
-    } for p in planes]
+    data = [
+        {
+            "id": p.id,
+            "nombre": p.nombre,
+            "descripcion": p.descripcion,
+            "precio": str(p.precio),
+            "limite_reservas": p.limite_reservas,
+            "comision": str(p.comision),
+        }
+        for p in planes
+    ]
 
     return JsonResponse(data, safe=False)
 
@@ -351,7 +403,6 @@ class TipoNegocioListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
 
-
 class CrearRecursosMasivos(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -360,9 +411,11 @@ class CrearRecursosMasivos(APIView):
         serializer.is_valid(raise_exception=True)
         recursos = serializer.save()
 
-        return Response({
-            "mensaje": f"{len(recursos)} recursos creados correctamente"
-        }, status=status.HTTP_201_CREATED)
+        return Response(
+            {"mensaje": f"{len(recursos)} recursos creados correctamente"},
+            status=status.HTTP_201_CREATED,
+        )
+
 
 class RecursosNegocioView(generics.ListAPIView):
     serializer_class = RecursoSerializer
@@ -377,14 +430,14 @@ class RecursosNegocioView(generics.ListAPIView):
 
         # Filtramos recursos cuyo negocio tiene como propietario al usuario logueado
         return Recurso.objects.filter(negocio__propietario=usuario)
-    
+
 
 class RecursosClienteView(generics.ListAPIView):
     serializer_class = RecursoSerializer
     permission_classes = [permissions.AllowAny]  # cualquier usuario puede ver
 
     def get_queryset(self):
-        negocio_id = self.request.query_params.get('negocio_id')
+        negocio_id = self.request.query_params.get("negocio_id")
         if negocio_id:
             return Recurso.objects.filter(negocio_id=negocio_id)
         return Recurso.objects.none()  # si no se pasa id, devolvemos vacío

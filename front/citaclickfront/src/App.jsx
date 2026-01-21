@@ -12,8 +12,7 @@ import RecursosCliente from './pages/RecursosCliente.jsx';
 import Perfil from './pages/Perfil.jsx';
 import VerHorarios from './pages/Ver_Horarios.jsx';
 import Reservar from './pages/Reservar.jsx';
-import BusquedaAvanzadaPeluquerias from './pages/BusquedaAvanzadaPeluquerias.jsx';
-
+import BusquedaAvanzadaNegocios from './pages/BusquedaAvanzadaNegocios.jsx';
 import MenuPrincipal from './PagesNegocios/PanelNegocio.jsx';
 import Ganancias from './PagesNegocios/Ganancias.jsx';
 import Reservas from './PagesNegocios/Reservas.jsx';
@@ -43,7 +42,7 @@ function App() {
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/negocio/:negocioId/ver_horarios/:recursoId" element={<VerHorarios />} />
           <Route path="/reservar" element={<Reservar />} />
-          <Route path="/busqueda-avanzada" element={<BusquedaAvanzadaPeluquerias />} />
+          <Route path="/busqueda-avanzada" element={<BusquedaAvanzadaNegocios />} />
           {/* Panel Negocios */}
           <Route path="/panelNegocio" element={<MenuPrincipal />} />
           <Route path="/ganancias" element={<Ganancias />} />
