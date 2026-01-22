@@ -102,3 +102,17 @@ class DiaNoDisponible(models.Model):
 
     def __str__(self):
         return f"{self.negocio.nombre} - {self.fecha}"
+    
+class BloqueHorarioNoDisponible(models.Model):
+    negocio = models.ForeignKey(Negocio, on_delete=models.CASCADE)
+    recurso = models.ForeignKey(Recurso, on_delete=models.CASCADE, null=True, blank=True)
+    fecha = models.DateField()
+    hora = models.TimeField()
+
+    class Meta:
+        unique_together = ('recurso', 'fecha', 'hora')
+        ordering = ['fecha', 'hora']
+
+    def __str__(self):
+        return f"{self.negocio.nombre} {self.fecha} {self.hora}"
+

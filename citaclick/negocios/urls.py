@@ -19,6 +19,9 @@ urlpatterns = [
     path('dias-no-disponibles/', DiaNoDisponibleListCreate.as_view(), name='dia-no-disponible-list-create'),
     path('dias-no-disponibles/<int:pk>/', DiaNoDisponibleRetrieveUpdateDestroy.as_view(), name='dia-no-disponible-detail'),
 
+    path("bloques-no-disponibles/", BloqueHorarioListCreate.as_view()),
+    path("bloques-no-disponibles/<int:pk>/", BloqueHorarioRetrieveDestroy.as_view()),
+
     path('horarios-disponibles/', HorariosDisponiblesView.as_view(), name='horarios-disponibles'),
 
     path('ganancias/', GananciasListView.as_view(), name='ganancias'),

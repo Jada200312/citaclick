@@ -63,6 +63,12 @@ class DiaNoDisponibleSerializer(serializers.ModelSerializer):
         model = DiaNoDisponible
         fields = '__all__'
 
+class BloqueHorarioNoDisponibleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BloqueHorarioNoDisponible
+        fields = '__all__'
+
+
 class TipoNegocioSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoNegocio

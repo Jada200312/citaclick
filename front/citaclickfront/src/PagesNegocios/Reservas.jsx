@@ -8,7 +8,6 @@ const Reservas = () => {
   const rolId = localStorage.getItem("rol");
   const negocioId = localStorage.getItem("negocio_id");
 
-  // 🔒 Validar acceso
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token) navigate("/login");

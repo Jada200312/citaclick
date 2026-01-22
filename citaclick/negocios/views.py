@@ -334,15 +334,49 @@ class HorarioNegocioRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView)
 # DÍAS NO DISPONIBLES
 # ==========================
 class DiaNoDisponibleListCreate(generics.ListCreateAPIView):
-    queryset = DiaNoDisponible.objects.all()
     serializer_class = DiaNoDisponibleSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        negocio_id = self.request.query_params.get('negocio')
+        queryset = DiaNoDisponible.objects.all()
+        if negocio_id:
+            queryset = queryset.filter(negocio_id=negocio_id)
+        return queryset
 
 
 class DiaNoDisponibleRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     queryset = DiaNoDisponible.objects.all()
     serializer_class = DiaNoDisponibleSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class BloqueHorarioListCreate(generics.ListCreateAPIView):
+    serializer_class = BloqueHorarioNoDisponibleSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        negocio = self.request.query_params.get("negocio")
+        fecha = self.request.query_params.get("fecha")
+        recurso = self.request.query_params.get("recurso")
+
+        qs = BloqueHorarioNoDisponible.objects.all()
+
+        if negocio:
+            qs = qs.filter(negocio_id=negocio)
+        if fecha:
+            qs = qs.filter(fecha=fecha)
+        if recurso:
+            qs = qs.filter(recurso_id=recurso)
+
+        return qs
+
+
+class BloqueHorarioRetrieveDestroy(generics.RetrieveDestroyAPIView):
+    queryset = BloqueHorarioNoDisponible.objects.all()
+    serializer_class = BloqueHorarioNoDisponibleSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 
 
 # ==========================
