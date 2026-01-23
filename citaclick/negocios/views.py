@@ -366,8 +366,17 @@ class BloqueHorarioListCreate(generics.ListCreateAPIView):
         return BloqueHorarioNoDisponibleSerializer
 
     def get_queryset(self):
-        negocio = get_negocio_or_error(self.request.user)
-        qs = BloqueHorarioNoDisponible.objects.filter(negocio=negocio)
+        user = self.request.user
+
+        # Si viene negocio por query param, úsalo
+        negocio_id = self.request.query_params.get("negocio")
+
+        if negocio_id:
+            qs = BloqueHorarioNoDisponible.objects.filter(negocio_id=negocio_id)
+        else:
+            # Si no viene, usamos el negocio del usuario (modo propietario)
+            negocio = get_negocio_or_error(user)
+            qs = BloqueHorarioNoDisponible.objects.filter(negocio=negocio)
 
         fecha = self.request.query_params.get("fecha")
         recurso = self.request.query_params.get("recurso")
