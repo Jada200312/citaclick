@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Recursos = () => {
   const [recursos, setRecursos] = useState([]);
@@ -12,15 +13,15 @@ const Recursos = () => {
     intervalo_tiempo: "",
   });
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchRecursos = async () => {
       try {
         const token = localStorage.getItem("access_token");
         const response = await axios.get(
           "http://localhost:8000/api/negocios/recursos/",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         setRecursos(response.data);
       } catch (error) {
@@ -58,47 +59,40 @@ const Recursos = () => {
 
     try {
       const token = localStorage.getItem("access_token");
-
       let horarioId = null;
 
       if (selectedRecurso.horario) {
-        // horario existente
         horarioId = selectedRecurso.horario.id;
 
-        // 1️⃣ Actualizar horario existente
         await axios.put(
           `http://localhost:8000/api/negocios/horarios-recurso/${horarioId}/`,
           formData,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
-        // 2️⃣ Actualizar el recurso con el mismo horario
         await axios.patch(
           `http://localhost:8000/api/negocios/recursos/${selectedRecurso.id}/`,
           { horario_id: horarioId },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
       } else {
-        // Crear nuevo horario
         const response = await axios.post(
           "http://localhost:8000/api/negocios/horarios-recurso/",
           { ...formData, recurso: selectedRecurso.id },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         horarioId = response.data.id;
 
-        // Actualizar recurso para apuntar al nuevo horario
         await axios.patch(
           `http://localhost:8000/api/negocios/recursos/${selectedRecurso.id}/`,
           { horario_id: horarioId },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
       }
 
-      // Refrescar lista de recursos
       const response = await axios.get(
         "http://localhost:8000/api/negocios/recursos/",
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setRecursos(response.data);
       closeModal();
@@ -125,18 +119,38 @@ const Recursos = () => {
           >
             <div>
               <h2 className="text-lg font-semibold mb-2">{recurso.nombre}</h2>
-              <p className="text-sm text-gray-300 mb-2">
+
+              <p className="text-sm text-gray-300 mb-3">
                 {recurso.horario
                   ? `${recurso.horario.horaInicio} - ${recurso.horario.horaFin}`
                   : "No has asignado horario aún"}
               </p>
-              <button
-                onClick={() => openModal(recurso)}
-                className="bg-orange-600 hover:bg-orange-500 text-white text-sm px-3 py-1 rounded transition-colors duration-200"
-              >
-                {recurso.horario ? "Editar horario" : "Asignar horario"}
-              </button>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => openModal(recurso)}
+                  className="bg-orange-600 hover:bg-orange-500 text-white text-sm px-3 py-1 rounded transition-colors duration-200"
+                >
+                  {recurso.horario ? "Editar horario" : "Asignar horario"}
+                </button>
+
+                {/* 👉 Nuevo botón bloquear horarios */}
+                <button
+                  onClick={() =>
+                    navigate("/bloquear-horarios", {
+                      state: {
+                        negocioId: recurso.negocio,
+                        recursoId: recurso.id,
+                      },
+                    })
+                  }
+                  className="bg-red-600 hover:bg-red-500 text-white text-sm px-3 py-1 rounded transition-colors duration-200"
+                >
+                  Bloquear horarios
+                </button>
+              </div>
             </div>
+
             <span
               className={`mt-4 text-sm font-medium px-2 py-1 rounded-full w-fit ${
                 recurso.activo ? "bg-green-600" : "bg-red-600"
@@ -153,8 +167,9 @@ const Recursos = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-zinc-950 p-6 rounded-lg w-80 relative">
             <h2 className="text-xl font-bold mb-4 text-white">
-              {selectedRecurso.horario ? "Editar Horario" : "Asignar Horario"}
+              {selectedRecurso?.horario ? "Editar Horario" : "Asignar Horario"}
             </h2>
+
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label className="block text-white text-sm">Hora Inicio</label>
@@ -167,6 +182,7 @@ const Recursos = () => {
                   className="w-full px-3 py-1 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
+
               <div>
                 <label className="block text-white text-sm">Hora Fin</label>
                 <input
@@ -178,6 +194,7 @@ const Recursos = () => {
                   className="w-full px-3 py-1 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
+
               <div>
                 <label className="block text-white text-sm">
                   Intervalo de tiempo (minutos)
@@ -191,6 +208,7 @@ const Recursos = () => {
                   className="w-full px-3 py-1 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
+
               <div className="flex justify-end space-x-2 mt-4">
                 <button
                   type="button"

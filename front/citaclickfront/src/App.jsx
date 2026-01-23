@@ -10,7 +10,7 @@ import RegistroNegocio from "./pages/RegistroNegocio.jsx";
 import ListadoNegocios from "./pages/ListadoNegocios.jsx";
 import RecursosCliente from "./pages/RecursosCliente.jsx";
 import Perfil from "./pages/Perfil.jsx";
-import VerHorarios from "./pages/Ver_Horarios.jsx";
+import VerHorarios from "./pages/ver_horarios.jsx";
 import Reservar from "./pages/Reservar.jsx";
 import BusquedaAvanzadaNegocios from "./pages/BusquedaAvanzadaNegocios.jsx";
 import MenuPrincipal from "./PagesNegocios/PanelNegocio.jsx";
@@ -22,6 +22,7 @@ import Agregar from "./PagesNegocios/Agregar";
 import EditarOEliminar from "./PagesNegocios/EditarOEliminar.jsx";
 import Editar from "./PagesNegocios/Editar.jsx";
 import Recursos from "./PagesNegocios/Recursos";
+import BloquearHorarios from "./PagesNegocios/BloquearHorarios";
 
 import "./index.css";
 
@@ -43,6 +44,7 @@ function App() {
             path="/negocio/:negocioId/ver_horarios/:recursoId"
             element={<VerHorarios />}
           />
+          <Route path="/bloquear-horarios" element={<BloquearHorarios />} />
           <Route path="/reservar" element={<Reservar />} />
           <Route
             path="/busqueda-avanzada"
