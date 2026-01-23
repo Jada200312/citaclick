@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied
+    
 
 from datetime import datetime, timedelta, date
 from django.utils.dateparse import parse_date
@@ -351,31 +353,49 @@ class DiaNoDisponibleRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView
     permission_classes = [permissions.IsAuthenticated]
 
 
+def get_negocio_or_error(user):
+    return getattr(user, 'negocio', None)
+
+
 class BloqueHorarioListCreate(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return BloqueHorarioNoDisponibleCreateSerializer
+        return BloqueHorarioNoDisponibleSerializer
+
+    def get_queryset(self):
+        negocio = get_negocio_or_error(self.request.user)
+        return BloqueHorarioNoDisponible.objects.filter(negocio=negocio)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        negocio = get_negocio_or_error(request.user)
+        serializer.context["negocio"] = negocio
+
+        serializer.save()
+
+        return Response(
+            {"mensaje": "Bloques guardados correctamente"},
+            status=status.HTTP_201_CREATED
+        )
+
+
+
+class BloqueHorarioRetrieveDestroy(generics.RetrieveDestroyAPIView):
     serializer_class = BloqueHorarioNoDisponibleSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        negocio = self.request.query_params.get("negocio")
-        fecha = self.request.query_params.get("fecha")
-        recurso = self.request.query_params.get("recurso")
+        # 🔐 Solo permite acceder a bloques del negocio propio
+        negocio = get_negocio_or_error(self.request.user)
+        if not negocio:
+            return BloqueHorarioNoDisponible.objects.none()
 
-        qs = BloqueHorarioNoDisponible.objects.all()
-
-        if negocio:
-            qs = qs.filter(negocio_id=negocio)
-        if fecha:
-            qs = qs.filter(fecha=fecha)
-        if recurso:
-            qs = qs.filter(recurso_id=recurso)
-
-        return qs
-
-
-class BloqueHorarioRetrieveDestroy(generics.RetrieveDestroyAPIView):
-    queryset = BloqueHorarioNoDisponible.objects.all()
-    serializer_class = BloqueHorarioNoDisponibleSerializer
-    permission_classes = [permissions.IsAuthenticated]
+        return BloqueHorarioNoDisponible.objects.filter(negocio=negocio)
 
 
 

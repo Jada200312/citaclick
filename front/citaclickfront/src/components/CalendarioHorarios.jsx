@@ -29,7 +29,11 @@ const CalendarioHorarios = ({ negocioId, recursoId }) => {
   // Rol del usuario
   // =========================
   const rolId = localStorage.getItem("rol");
-  const esPropietario = rolId === "propietario"; // ajusta según tu valor real
+  const negocioPropioId = localStorage.getItem("negocio_id");
+  const esPropietario = rolId === "propietario";
+  const esMiNegocio = String(negocioId) === String(negocioPropioId);
+
+  const puedeBloquear = esPropietario && esMiNegocio;
 
   // =========================
   // Cargar días bloqueados
@@ -140,7 +144,7 @@ const CalendarioHorarios = ({ negocioId, recursoId }) => {
   // Click en hora
   // =========================
   const manejarClick = (hora) => {
-    if (esPropietario) {
+    if (puedeBloquear) {
       // Seleccionar/desseleccionar bloque
       if (bloquesSeleccionados.includes(hora)) {
         setBloquesSeleccionados(bloquesSeleccionados.filter((h) => h !== hora));
@@ -167,16 +171,24 @@ const CalendarioHorarios = ({ negocioId, recursoId }) => {
     const token = localStorage.getItem("access_token");
     if (!token) return navigate("/login");
 
+    const payload = {
+      negocio: negocioId,
+      fecha: format(fecha, "yyyy-MM-dd"),
+      bloques: bloquesSeleccionados,
+      recurso: recursoId,
+    };
+
+    console.log("📦 Payload enviado al backend:");
+    console.log(JSON.stringify(payload, null, 2));
+
     try {
-      await axios.post(
-        `http://localhost:8000/api/negocios/bloques-no-disponibles/`,
-        {
-          negocio: negocioId,
-          fecha: format(fecha, "yyyy-MM-dd"),
-          bloques: bloquesSeleccionados,
-        },
+      const response = await axios.post(
+        "http://localhost:8000/api/negocios/bloques-no-disponibles/",
+        payload,
         { headers: { Authorization: `Bearer ${token}` } },
       );
+
+      console.log("✅ Respuesta backend:", response.data);
 
       setBloquesBloqueados([
         ...bloquesBloqueados,
@@ -184,7 +196,14 @@ const CalendarioHorarios = ({ negocioId, recursoId }) => {
       ]);
       setBloquesSeleccionados([]);
     } catch (err) {
-      console.error("No se pudieron bloquear los horarios", err);
+      console.error("❌ Error completo:", err);
+
+      if (err.response) {
+        console.error("❌ Datos error backend:", err.response.data);
+        console.error("❌ Status:", err.response.status);
+      } else {
+        console.error("❌ Error sin respuesta del servidor");
+      }
     }
   };
 

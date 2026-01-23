@@ -31,9 +31,21 @@ class NegocioSerializer(serializers.ModelSerializer):
         read_only_fields = ['propietario', 'fecha_registro', 'plan', 'estado']
 
     def create(self, validated_data):
-        request = self.context['request']
-        validated_data['propietario'] = request.user
-        return super().create(validated_data)
+        negocio = self.context["negocio"]
+        recurso_id = validated_data["recurso"]
+        fecha = validated_data["fecha"]
+        bloques = validated_data["bloques"]
+
+        for hora in bloques:
+            BloqueHorarioNoDisponible.objects.get_or_create(
+                negocio=negocio,
+                recurso_id=recurso_id,
+                fecha=fecha,
+                hora=hora
+            )
+
+        # devolvemos algo simbólico
+        return {"status": "ok"}
 
     def get_promedio_calificaciones(self, obj):
         promedio = obj.calificacion_set.aggregate(prom=Avg('calificacion'))['prom']
@@ -67,6 +79,33 @@ class BloqueHorarioNoDisponibleSerializer(serializers.ModelSerializer):
     class Meta:
         model = BloqueHorarioNoDisponible
         fields = '__all__'
+
+
+class BloqueHorarioNoDisponibleCreateSerializer(serializers.Serializer):
+    fecha = serializers.DateField()
+    recurso = serializers.IntegerField()
+    bloques = serializers.ListField(
+        child=serializers.TimeField()
+    )
+
+    def create(self, validated_data):
+        negocio = self.context["negocio"]
+        recurso_id = validated_data["recurso"]
+        fecha = validated_data["fecha"]
+        bloques = validated_data["bloques"]
+
+        objetos = []
+        for hora in bloques:
+            obj, created = BloqueHorarioNoDisponible.objects.get_or_create(
+                negocio=negocio,
+                recurso_id=recurso_id,
+                fecha=fecha,
+                hora=hora
+            )
+            objetos.append(obj)
+
+        return objetos
+
 
 
 class TipoNegocioSerializer(serializers.ModelSerializer):
