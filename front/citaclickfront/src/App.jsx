@@ -23,6 +23,7 @@ import EditarOEliminar from "./PagesNegocios/EditarOEliminar.jsx";
 import Editar from "./PagesNegocios/Editar.jsx";
 import Recursos from "./PagesNegocios/Recursos";
 import BloquearHorarios from "./PagesNegocios/BloquearHorarios";
+import SeleccionTipo from "./pages/SeleccionTipo.jsx";
 
 import "./index.css";
 
@@ -39,6 +40,7 @@ function App() {
           <Route path="/registrar_negocio" element={<RegistroNegocio />} />
           <Route path="/negocio/:id/recursos" element={<RecursosCliente />} />
           <Route path="/listado_negocios" element={<ListadoNegocios />} />
+          <Route path="/seleccionar_tipo" element={<SeleccionTipo />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route
             path="/negocio/:negocioId/ver_horarios/:recursoId"

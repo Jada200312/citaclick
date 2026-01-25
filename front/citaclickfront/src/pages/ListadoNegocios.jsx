@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { Star } from "lucide-react";
 
@@ -13,10 +13,12 @@ const ListadoNegocios = () => {
   const [comentario, setComentario] = useState("");
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const tipoSeleccionado = query.get("tipo");
 
   const fetchNegocios = () => {
     const token = localStorage.getItem("access_token");
-
     if (!token) {
       navigate("/login");
       return;
@@ -28,7 +30,6 @@ const ListadoNegocios = () => {
       })
       .then((res) => setNegocios(res.data))
       .catch((err) => {
-        console.error("Error cargando negocios:", err);
         if (err.response?.status === 401) navigate("/login");
       });
   };
@@ -37,12 +38,15 @@ const ListadoNegocios = () => {
     fetchNegocios();
   }, []);
 
-  const negociosFiltrados = negocios.filter((n) =>
-    n.nombre.toLowerCase().includes(filtro.toLowerCase())
-  );
+  const negociosFiltrados = negocios
+    .filter((n) => n.nombre.toLowerCase().includes(filtro.toLowerCase()))
+    .filter((n) => {
+      if (!tipoSeleccionado) return true;
+      const tipoId = typeof n.tipo === "object" ? n.tipo.id : n.tipo;
+      return tipoId === parseInt(tipoSeleccionado);
+    });
 
   const irABusquedaAvanzada = () => navigate("/busqueda-avanzada");
-
   const verRecursos = (id) => navigate(`/negocio/${id}/recursos`);
 
   const handleStarClick = (negocioId, rating) => {
@@ -70,7 +74,6 @@ const ListadoNegocios = () => {
         fetchNegocios();
       })
       .catch((err) => {
-        console.error("Error al enviar calificación:", err);
         if (err.response?.data?.error?.includes("mes")) {
           alert("Solo puedes calificar una vez al mes este negocio.");
         } else {
@@ -118,6 +121,7 @@ const ListadoNegocios = () => {
       <h1 className="text-3xl font-bold text-white text-center">
         Negocios <span className="text-orange-500">Disponibles</span>
       </h1>
+
       <h1 className="text-3xl font-bold mb-4">Reservar una cita</h1>
 
       <div className="flex items-center justify-between mb-6">
@@ -186,7 +190,6 @@ const ListadoNegocios = () => {
         ))}
       </div>
 
-      {/* Modal de calificación */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
