@@ -40,4 +40,11 @@ urlpatterns = [
     path('recursos/cliente/', RecursosClienteView.as_view(), name='recursos-cliente'),
     path('recursos/horarios-disponibles/', HorariosDisponiblesRecursoView.as_view(), name='horarios-disponibles-recurso'),
 
+    path('hotel/habitacion/<int:recurso_id>/ocupadas/',
+    FechasOcupadasHabitacion.as_view(),
+    name='fechas-ocupadas-habitacion'),
+    path('hotel/reservar/',
+    CrearReservaHotel.as_view(),
+    name='crear-reserva-hotel'),
+
 ]

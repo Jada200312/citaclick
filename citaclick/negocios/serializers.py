@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from reservas.models import ReservaHotel
 from django.db.models import Avg, Count
 
 
@@ -153,6 +154,16 @@ class RecursoSerializer(serializers.ModelSerializer):
         required=False,
     )
 
+    tipo_negocio_id = serializers.IntegerField(source='negocio.tipo.id', read_only=True)
+    tipo_negocio_nombre = serializers.CharField(source='negocio.tipo.nombre', read_only=True)
+
     class Meta:
         model = Recurso
-        fields = ['id', 'nombre', 'activo', 'horario', 'horario_id', 'negocio']
+        fields = ['id', 'nombre', 'activo', 'horario', 'horario_id', 'negocio', 'tipo_negocio_id', 'tipo_negocio_nombre']
+
+
+class ReservaHotelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReservaHotel
+        fields = '__all__'
+        read_only_fields = ['usuario', 'fecha_creacion']

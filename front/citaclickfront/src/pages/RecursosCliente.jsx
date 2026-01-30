@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
 const RecursosCliente = () => {
-  const { id: negocioId } = useParams(); // ID del negocio desde la URL
+  const { id: negocioId } = useParams();
   const navigate = useNavigate();
   const [recursos, setRecursos] = useState([]);
   const [negocio, setNegocio] = useState(null);
@@ -16,20 +16,17 @@ const RecursosCliente = () => {
       try {
         const token = localStorage.getItem("access_token");
 
-        // Traer info del negocio
         const negocioRes = await axios.get(
           `http://localhost:8000/api/negocios/${negocioId}/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setNegocio(negocioRes.data);
 
-        // Traer recursos del negocio (solo lectura)
         const recursosRes = await axios.get(
           `http://localhost:8000/api/negocios/recursos/cliente/?negocio_id=${negocioId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        // Filtrar solo recursos activos y con horario asignado
         const recursosValidos = recursosRes.data.filter(
           (recurso) => recurso.horario && recurso.activo
         );
@@ -44,10 +41,16 @@ const RecursosCliente = () => {
     fetchData();
   }, [negocioId]);
 
-  const irAVerHorarios = (recursoId) => {
-  navigate(`/negocio/${negocioId}/ver_horarios/${recursoId}`);
-};
+  const irAVerHorarios = (recurso) => {
+    if (!recurso?.id) return;
 
+    const tipoRecurso = recurso.tipo_negocio?.tipo_recurso?.toLowerCase() || "";
+    if (tipoRecurso === "habitación") {
+      navigate(`/hotel/reservar/${recurso.id}`);
+    } else {
+      navigate(`/negocio/${negocioId}/ver_horarios/${recurso.id}`);
+    }
+  };
 
   if (loading) return <p className="text-white">Cargando recursos...</p>;
   if (!recursos.length)
@@ -71,7 +74,8 @@ const RecursosCliente = () => {
                 {`${recurso.horario.horaInicio} - ${recurso.horario.horaFin}`}
               </p>
               <button
-                onClick={() => irAVerHorarios(recurso.id)}
+                type="button"
+                onClick={() => irAVerHorarios(recurso)}
                 className="bg-orange-600 hover:bg-orange-500 text-white text-sm px-3 py-1 rounded transition-colors duration-200"
               >
                 Ver horarios

@@ -15,6 +15,7 @@ from .models import *
 from .serializers import *
 
 from reservas.models import Reserva
+from reservas.models import ReservaHotel
 
 
 # ==========================
@@ -515,3 +516,71 @@ class RecursosClienteView(generics.ListAPIView):
         if negocio_id:
             return Recurso.objects.filter(negocio_id=negocio_id)
         return Recurso.objects.none()  # si no se pasa id, devolvemos vacío
+
+#RESERVA HOTEL
+class FechasOcupadasHabitacion(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, recurso_id):
+        reservas = ReservaHotel.objects.filter(recurso_id=recurso_id)
+
+        data = [
+            {
+                "fecha_inicio": r.fecha_inicio,
+                "fecha_fin": r.fecha_fin
+            }
+            for r in reservas
+        ]
+
+        return Response(data)
+
+class CrearReservaHotel(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        recurso_id = request.data.get("recurso_id")
+        fecha_inicio = parse_date(request.data.get("fecha_inicio"))
+        fecha_fin = parse_date(request.data.get("fecha_fin"))
+
+        if not recurso_id or not fecha_inicio or not fecha_fin:
+            return Response(
+                {"error": "recurso_id, fecha_inicio y fecha_fin son obligatorios"},
+                status=400
+            )
+
+        if fecha_fin <= fecha_inicio:
+            return Response(
+                {"error": "La fecha final debe ser mayor a la inicial"},
+                status=400
+            )
+
+        recurso = Recurso.objects.get(id=recurso_id)
+
+        # 🔥 Validar solapamiento
+        existe = ReservaHotel.objects.filter(
+            recurso=recurso,
+            fecha_inicio__lt=fecha_fin,
+            fecha_fin__gt=fecha_inicio
+        ).exists()
+
+        if existe:
+            return Response(
+                {"error": "La habitación ya está reservada en ese rango"},
+                status=400
+            )
+
+        reserva = ReservaHotel.objects.create(
+            negocio=recurso.negocio,
+            recurso=recurso,
+            usuario=request.user,
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin
+        )
+
+        return Response(
+            {
+                "mensaje": "Reserva creada correctamente",
+                "reserva_id": reserva.id
+            },
+            status=201
+        )

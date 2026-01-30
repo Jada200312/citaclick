@@ -116,3 +116,4 @@ class BloqueHorarioNoDisponible(models.Model):
     def __str__(self):
         return f"{self.negocio.nombre} {self.fecha} {self.hora}"
 
+

@@ -24,6 +24,7 @@ import Editar from "./PagesNegocios/Editar.jsx";
 import Recursos from "./PagesNegocios/Recursos";
 import BloquearHorarios from "./PagesNegocios/BloquearHorarios";
 import SeleccionTipo from "./pages/SeleccionTipo.jsx";
+import ReservaHotel from "./pages/ReservaHotel";
 
 import "./index.css";
 
@@ -48,6 +49,7 @@ function App() {
           />
           <Route path="/bloquear-horarios" element={<BloquearHorarios />} />
           <Route path="/reservar" element={<Reservar />} />
+          <Route path="/hotel/reservar/:recursoId" element={<ReservaHotel />}/>
           <Route
             path="/busqueda-avanzada"
             element={<BusquedaAvanzadaNegocios />}

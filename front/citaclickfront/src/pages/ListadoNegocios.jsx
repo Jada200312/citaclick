@@ -47,7 +47,9 @@ const ListadoNegocios = () => {
     });
 
   const irABusquedaAvanzada = () => navigate("/busqueda-avanzada");
-  const verRecursos = (id) => navigate(`/negocio/${id}/recursos`);
+  const verRecursos = (negocio) => {
+    navigate(`/negocio/${negocio.id}/recursos`);
+  };
 
   const handleStarClick = (negocioId, rating) => {
     setCurrentNegocio(negocioId);
@@ -169,7 +171,7 @@ const ListadoNegocios = () => {
 
             <div className="p-4">
               <button
-                onClick={() => verRecursos(negocio.id)}
+                onClick={() => verRecursos(negocio)}
                 className="mt-4 bg-orange-600 hover:bg-orange-400 text-white px-4 py-2 rounded"
               >
                 Ver Recursos
